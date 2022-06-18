@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta
+    http-equiv="Content-Security-Policy"
+    content="script-src 'self' 'unsafe-inline';"
+    />
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -39,5 +43,28 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+    <div class="topBar"></div>
+    <ul>
+        <li><a href="default.asp">Home</a></li>
+        <li><a href="news.asp">News</a></li>
+        <li><a href="contact.asp">Contact</a></li>
+        <li><a href="about.asp">About</a></li>
+      </ul>
+      
+    <div class="topSpacer"></div>
+
+
+    <h1>Welcome to My Electron App</h1>
+
+    <h1>Serial port read</h1>
+    <textarea class="darkRegion" rows="30" cols="50" id="dataWindow"></textarea>
+
+    We are using Node.js <span id="node-version"></span>, Chromium <span id="chrome-version"></span>, Electron <span id="electron-version"></span>, and Serialport <span id="serialport-version"></span>
+
+    <div id="error"></div>
+    <div id="ports"></div>
+
+    <script src="renderer.js"></script>
+
   </body>
 </html>
