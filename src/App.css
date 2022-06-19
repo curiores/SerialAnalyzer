@@ -1,3 +1,8 @@
+body > #root > div {
+  height: 100vh;
+  width: 100vw;
+}
+
 .App {
   text-align: center;
 }
