@@ -10,7 +10,7 @@ import Dialog from '@mui/material/Dialog';
 import CableIcon from '@mui/icons-material/Cable';
 import Typography from '@mui/material/Typography';
 import { indigo } from '@mui/material/colors';
-import { SerialDataObject, StartSerial, StopSerial } from '../SerialData/SerialData';
+import { SerialDataObject, StartSerial, SetSerialDefaults } from '../SerialData/SerialData';
 
 const { SerialPort } = window.require("serialport");
 
@@ -23,6 +23,7 @@ export interface SerialDialogProps {
 }
 
 function SimpleDialog(props: SerialDialogProps) {
+  // This dialog creates clickable items for each port
   const { onClose, open } = props;
 
   const handleClose = () => {
@@ -53,31 +54,42 @@ function SimpleDialog(props: SerialDialogProps) {
 }
 
 export function SerialPortsList() {
+  // This component includes the button that allows you to select the port
+  // It also renders the dialog when the state "open" is true
+  
+  // Is the dialog open?
+  const [open, setOpen] = React.useState(false); 
 
-  const [open, setOpen] = React.useState(false);
+  // Is the serial port running currently?
   const [serialOn, setSerialOn] = React.useState(false);
-  const [selectedPort, setSelectedPort] = React.useState({path:null,friendlyName:"none"}); 
+
+  // 
+  //const [selectedPort, setSelectedPort] = React.useState({path:null,friendlyName:"none"}); 
 
   const handleClickOpen = () => {
+    // Looks for serial ports, returns a promise
     showSerialPorts().then( (result) => {
+      // When the promise returns, open the dialog
       setOpen(true);
     });
   };
 
   const stopSerialCallback = () =>{
-    StopSerial();
-    setSerialOn(false);
-    var startStopButton = null;
+    if(SerialDataObject.serialObj !== null){
+      SerialDataObject.serialObj.close((err) => {
+          SetSerialDefaults();
+          var startStopButton = null;
+          setSerialOn(false);
+      });
+    }
   }
 
   const handleClose = (port: any) => {
     if(port !== "none"){
       SerialDataObject.port = port; // Set the global port
-      StartSerial(); // Start up the serial port
-
-      
+      StartSerial(); // Start up the serial port     
       setSerialOn(true);
-      setSelectedPort(port);
+      //setSelectedPort(port);
     }
     // Always close the window
     setOpen(false);
@@ -98,10 +110,9 @@ export function SerialPortsList() {
       {setSerialButton}
       {startStopButton}
       <Typography variant="subtitle1" component="div">
-        Current: {selectedPort.friendlyName}
+        Current: {SerialDataObject.port.friendlyName}
       </Typography>
       <SimpleDialog
-        selectedPort={selectedPort}
         open={open}
         onClose={handleClose}
       />

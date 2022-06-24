@@ -33,7 +33,8 @@ const divStyle = {
 };
 
 function createData(xvec,yarray,yindex){
-  // yvec should be the same length as xvec
+  // This creates data arrays of the form [{x:100,y:23.44},{x:100,y:23.44},...]
+  // From the serial data
   var data = [];
   for(var k = 0; k < xvec.length; k++){
     data.push({ x: xvec[k], 
@@ -56,8 +57,7 @@ var defaultChartOptions = {
       position: 'top'
     },
     title: {
-      display: true,
-      text: "Data",
+      display: false
     },
   },
   elements: {
@@ -84,20 +84,22 @@ export default class SerialChart extends React.Component{
      
   constructor(props){
     super(props)
-    this.state = { seconds: 0};
-    this.chartOptions = defaultChartOptions;
+    // This chart reference is needed to update the charts
     this.chartRef = React.createRef(); 
   };
 
   updateChart(){
 
     if(this.chartRef !== null && SerialDataObject.data.length !== 0){
+      
+      // Get the reference to the chart object
+      var chart = this.chartRef.current;
+
       // Get the size of the data
       var nel = SerialDataObject.data.length;
       var nvars = SerialDataObject.data[nel-1].length;
 
       // Check if there are enough chart data objects
-      var chart = this.chartRef.current;
       k = chart.data.datasets.length;
       while(chart.data.datasets.length < nvars ){
         // Add a new dataset if its too short
@@ -125,7 +127,7 @@ export default class SerialChart extends React.Component{
       // Update options
       var newOps = defaultChartOptions;
       newOps.scales.x.max = SerialDataObject.bufferSize;
-      newOps.plugins.title.text="???";
+      newOps.plugins.title.text=SerialDataObject.port.friendlyName;
       chart.options = newOps;
 
       // Call the update
@@ -134,23 +136,18 @@ export default class SerialChart extends React.Component{
   }
 
   componentDidMount(){
-
+    // This will refresh the chart as often as indiciated
+    // in the variable refreshRate
     setInterval(() => {
-      
-      this.setState(state => ({
-        seconds: state.seconds + 1,
-      }));
-
       this.updateChart();
-      
     }, refreshRate); 
   }
-  
 
+  // Render the chart component (this only updates when the chart is created)
   render(){
     return(
       <div style={divStyle}>
-          <Line data={data} options={this.chartOptions} ref={this.chartRef}/>
+          <Line data={data} options={defaultChartOptions} ref={this.chartRef}/>
       </div>
     )
   }

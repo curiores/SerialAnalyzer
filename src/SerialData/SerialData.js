@@ -12,15 +12,11 @@ export var SerialDataObject = {
     serialObj: null
 }
 
-export function StopSerial(){
-    if(SerialDataObject.serialObj !== null){
-        SerialDataObject.serialObj.close((err) => {
-            console.log('port closed', err);
-            SerialDataObject.data = [];
-            SerialDataObject.dataIndex = [];
-            SerialDataObject.serialObj = null;
-        });
-    }
+export function SetSerialDefaults(){
+    SerialDataObject.data = [];
+    SerialDataObject.dataIndex = [];
+    SerialDataObject.serialObj = null;
+    SerialDataObject.port = {path:null, friendlyName:"None"};
 }
 
 export function StartSerial(){
