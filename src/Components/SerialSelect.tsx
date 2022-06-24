@@ -10,7 +10,7 @@ import Dialog from '@mui/material/Dialog';
 import CableIcon from '@mui/icons-material/Cable';
 import Typography from '@mui/material/Typography';
 import { indigo } from '@mui/material/colors';
-import { SerialDataObject } from '../SerialData/SerialData';
+import { SerialDataObject, StartSerial } from '../SerialData/SerialData';
 
 const { SerialPort } = window.require("serialport");
 
@@ -68,6 +68,7 @@ export function SerialPortsList() {
     setOpen(false);
     setSelectedPort(port);
     SerialDataObject.port = port; // Set the global port
+    StartSerial();
   };
 
   return (
