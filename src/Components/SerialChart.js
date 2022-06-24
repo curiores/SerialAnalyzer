@@ -124,9 +124,7 @@ export default class SerialChart extends React.Component{
   constructor(props){
     super(props)
    
-    this.state = { key: Date.now(),
-                   seconds: 0,
-                   data: data};
+    this.state = { seconds: 0};
 
     this.chartOptions = defaultChartOptions;
 
@@ -134,34 +132,39 @@ export default class SerialChart extends React.Component{
 
   };
 
+  updateChart(){
+    if(this.chartRef !== null){
+      
+      // Update data
+      var mag = Math.random();
+      var tempData = createData(tData(n,tmax*Math.random()),sinData(n,tmax,mag));
+      var chart = this.chartRef.current;
+        chart.data.datasets.forEach((dataset) => {
+          dataset.data.pop();
+      });
+      chart.data.datasets[0].data = tempData;
+
+      // Update options
+      var newOps = defaultChartOptions;
+      newOps.plugins.title.text="mag: " + String(mag);
+      chart.options = newOps;
+
+      // Call the update
+      chart.update();
+    }
+  }
+
   componentDidMount(){
 
     setInterval(() => {
       
-      
-      data.datasets[0].data = createData(tData(n,tmax*Math.random()),sinData(n,tmax,mag));
-
       this.setState(state => ({
         seconds: state.seconds + 1,
-        key: Date.now(),
-        data: data
       }));
 
-      if(this.chartRef !== null){
-        var chart = this.chartRef.current;
-        chart.data.datasets.forEach((dataset) => {
-          dataset.data.pop();
-      });
-        chart.update();
-        console.log(chart)
-      }
-
-      if(this.chartReference)
-      var mag = Math.random();
-      console.log(data.datasets[0].data[10])
+      this.updateChart();
       
-      
-    }, 10); 
+    }, 500); 
   }
   
   buttonClick = () => {}
@@ -171,51 +174,8 @@ export default class SerialChart extends React.Component{
       <div style={divStyle}>
           <Button variant="outlined" onClick={this.buttonClick}> Update plot {this.state.seconds}
           </Button>
-          <Line data={this.state.data} options={this.chartOptions} redraw={true} ref={this.chartRef}/>
+          <Line data={data} options={this.chartOptions} ref={this.chartRef}/>
       </div>
     )
   }
 }
-
-/*
-export default function SerialChart() {
-  const [open, setOpen] = useState(false);
-  const [sw, setSwitch] = useState(false);
-  const [chartOptions, setChartOptions] = useState(false);
-
-  const buttonClick = () => {
-      
-      var options = defaultChartOptions;
-      options.plugins.title.text = SerialDataObject.port.friendlyName;
-
-      setChartOptions(options);
-      console.log(sw)
-      setSwitch(!sw);
-      console.log(sw)
-
-      console.log(chartOptions)
-      setOpen(true)
-      
-  }
-  
-  if(open && sw){
-    return (
-        <div style={divStyle}>
-          <Button variant="outlined" onClick={buttonClick}> Update plot
-          </Button>
-          <Line data={data} options={chartOptions} />
-        </div>
-    );
-  }
-  else{
-    return (
-      <div style={divStyle}>
-        <Button variant="outlined" onClick={buttonClick}> Update plot
-        </Button>
-      </div>
-  );
-  }
-
-}
-
-*/
