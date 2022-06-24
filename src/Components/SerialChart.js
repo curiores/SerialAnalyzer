@@ -2,6 +2,8 @@ import React from 'react';
 import { Line } from 'react-chartjs-2';
 import { SerialDataObject } from '../SerialData/SerialData';
 
+import { colorList } from '../Resources/colorList.js';
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -41,22 +43,7 @@ function createData(xvec,yarray,yindex){
 }
 var data = {
   labels: [],
-  datasets: [
-    {
-      label: 'Dataset 1',
-      data: [],
-      borderColor: 'rgb(255, 99, 132)',
-      backgroundColor: 'rgba(255, 99, 132, 0.5)',
-      borderWidth: 2,
-    },
-    {
-      label: 'Dataset 2',
-      data: [],
-      borderColor: 'rgb(53, 162, 235)',
-      backgroundColor: 'rgba(53, 162, 235, 0.5)',
-      borderWidth: 2,
-    },
-  ],
+  datasets: [],
 };
 
 var defaultChartOptions = {
@@ -105,15 +92,36 @@ export default class SerialChart extends React.Component{
   updateChart(){
 
     if(this.chartRef !== null && SerialDataObject.data.length !== 0){
-      
+      // Get the size of the data
+      var nel = SerialDataObject.data.length;
+      var nvars = SerialDataObject.data[nel-1].length;
+
+      // Check if there are enough chart data objects
       var chart = this.chartRef.current;
+      k = chart.data.datasets.length;
+      while(chart.data.datasets.length < nvars ){
+        // Add a new dataset if its too short
+        chart.data.datasets.push(
+          {
+            label: 'Dataset ' + k ,
+            data: [],
+            borderColor: colorList[k % colorList.length],
+            backgroundColor: colorList[k % colorList.length],
+            borderWidth: 2,
+          },
+        )
+        k = k + 1;
+      }
+      while(chart.data.datasets.length > nvars ){
+        // If there are too many, remove the last one.
+        chart.data.datasets.pop();
+      }
 
       // Update with data from the serial port
-      var nvars = SerialDataObject.data[0].length;
       for(var k = 0; k < nvars; k++){
         chart.data.datasets[k].data = createData(SerialDataObject.dataIdx,SerialDataObject.data,k);   
       }
-      
+
       // Update options
       var newOps = defaultChartOptions;
       newOps.scales.x.max = SerialDataObject.bufferSize;

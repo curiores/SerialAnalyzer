@@ -10,7 +10,7 @@ import Dialog from '@mui/material/Dialog';
 import CableIcon from '@mui/icons-material/Cable';
 import Typography from '@mui/material/Typography';
 import { indigo } from '@mui/material/colors';
-import { SerialDataObject, StartSerial } from '../SerialData/SerialData';
+import { SerialDataObject, StartSerial, StopSerial } from '../SerialData/SerialData';
 
 const { SerialPort } = window.require("serialport");
 
@@ -19,15 +19,14 @@ var ports: any = portsDefault;
 
 export interface SerialDialogProps {
   open: boolean;
-  selectedPort: any;
   onClose: (value: string) => void;
 }
 
 function SimpleDialog(props: SerialDialogProps) {
-  const { onClose, selectedPort, open } = props;
+  const { onClose, open } = props;
 
   const handleClose = () => {
-    onClose(selectedPort);
+    onClose("none");
   };
 
   const handleListItemClick = (value: string) => {
@@ -56,7 +55,8 @@ function SimpleDialog(props: SerialDialogProps) {
 export function SerialPortsList() {
 
   const [open, setOpen] = React.useState(false);
-  const [selectedPort, setSelectedPort] = React.useState({path:"None",friendlyName:"none"}); 
+  const [serialOn, setSerialOn] = React.useState(false);
+  const [selectedPort, setSelectedPort] = React.useState({path:null,friendlyName:"none"}); 
 
   const handleClickOpen = () => {
     showSerialPorts().then( (result) => {
@@ -64,18 +64,39 @@ export function SerialPortsList() {
     });
   };
 
+  const stopSerialCallback = () =>{
+    StopSerial();
+    setSerialOn(false);
+    var startStopButton = null;
+  }
+
   const handleClose = (port: any) => {
+    if(port !== "none"){
+      SerialDataObject.port = port; // Set the global port
+      StartSerial(); // Start up the serial port
+
+      
+      setSerialOn(true);
+      setSelectedPort(port);
+    }
+    // Always close the window
     setOpen(false);
-    setSelectedPort(port);
-    SerialDataObject.port = port; // Set the global port
-    StartSerial();
   };
+
+
+  var startStopButton = null;
+  var setSerialButton = null;
+  if( serialOn ){
+    startStopButton = <StopSerialButton stopSerialCallback={stopSerialCallback} />
+  }
+  else{
+    setSerialButton = <SetSerialButton handleClickOpen={handleClickOpen} />
+  }
 
   return (
     <div>
-      <Button variant="outlined" onClick={handleClickOpen}>
-        Set Serial Port
-      </Button>
+      {setSerialButton}
+      {startStopButton}
       <Typography variant="subtitle1" component="div">
         Current: {selectedPort.friendlyName}
       </Typography>
@@ -88,6 +109,23 @@ export function SerialPortsList() {
   );
 
 }
+
+function SetSerialButton({handleClickOpen}){
+  return(
+    <Button variant="outlined" onClick={handleClickOpen}>
+      Set Serial Port
+    </Button>
+  )
+}
+
+function StopSerialButton({stopSerialCallback}) {
+  return (
+    <Button variant="outlined" onClick={stopSerialCallback}>
+      Stop Serial
+    </Button>
+  );
+}
+
 
 function showSerialPorts(){
   return SerialPort.list().then((portsLocal: any, err: any) => {
