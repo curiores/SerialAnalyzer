@@ -1,6 +1,6 @@
 import './App.css';
 import {SerialPortsList, SerialDialogProps} from './Components/SerialSelect.tsx';
-import SerialChart from './Components/SerialChart.tsx';
+import SerialChart from './Components/SerialChart.js';
 
 
 function App() {
