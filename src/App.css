@@ -1,3 +1,11 @@
+
+:root {
+  --main-text-color:rgb(200,200,200);
+  --faded-text-color:rgb(150,150,150);
+  --dark-background:rgb(20,20,20);
+}
+
+
 body > #root > div {
   height: 100vh;
   width: 100vw;
@@ -5,39 +13,77 @@ body > #root > div {
 
 .App {
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
+  color: white;
+  font-size: calc(10px + 2vmin);
   background-color: #282c34;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  min-width: 100vw;
+
 }
 
-.App-link {
-  color: #61dafb;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.topBar{
+  display:flex;
+  width:100%;
+  height: 34px;
+  background-color: rgb(37,37,38);
+  position: absolute;
+  margin: 0px;
+  padding: 0px;
+  top: 0px;
+  left: 0px;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-app-region: drag;
+  z-index: 1500;
+}
+
+.title{
+  font-size: 16px;
+  width:20%;
+  height:100%;
+  vertical-align: middle;
+  text-align: left;
+  padding-top:6px;
+  padding-left:16px;
+  margin:0em;
+  color:var(--faded-text-color);
+  
+
+}
+
+.topSpacer{
+  height:30px;
+  margin:0px;
+  width:100%;
+}
+
+/*---------- SCROLLBAR -------------*/
+
+*::-webkit-scrollbar {
+  width: 12px;
+}
+
+*::-webkit-scrollbar-track {
+  background:var(--dark-background) ;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--faded-text-color);
+  border-radius: 20px;
+  border: 2px solid var(--dark-background);
 }

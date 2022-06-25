@@ -25,11 +25,16 @@ ChartJS.register(
   Legend
 );
   
-var refreshRate = 10; // In ms
+var refreshRate = 16; // In ms
+
+var gridColor = 'rgba(100,100,100,0.3)';
+var plotFontColor = 'rgb(180,180,180)';
+var axisColor = 'rgb(180,180,180)';
 
 const divStyle = {
-  height: '60vh',
-  width: '80%'
+  width: '90%',
+  height: '90%',
+  margin: 'auto'
 };
 
 function createData(xvec,yarray,yindex){
@@ -54,7 +59,10 @@ var defaultChartOptions = {
   tension: 0.1,
   plugins: {
     legend: {
-      position: 'top'
+      position: 'top',
+      labels: {
+        color: plotFontColor
+      }
     },
     title: {
       display: false
@@ -70,11 +78,25 @@ var defaultChartOptions = {
           type: 'linear',
           min: 0,
           max: 1,
+          grid: {
+            color: gridColor,
+            borderColor: axisColor
+          },
+          ticks:{
+            color: plotFontColor
+          }
       },
       y: {
         type: 'linear',
         min: -3,
-        max: 3
+        max: 3,
+        grid: {
+          color: gridColor,
+          borderColor: axisColor
+        },
+        ticks:{
+          color: plotFontColor
+        }
     }
   }
 };
@@ -100,12 +122,13 @@ export default class SerialChart extends React.Component{
       var nvars = SerialDataObject.data[nel-1].length;
 
       // Check if there are enough chart data objects
-      k = chart.data.datasets.length;
+      var k = chart.data.datasets.length;
       while(chart.data.datasets.length < nvars ){
         // Add a new dataset if its too short
         chart.data.datasets.push(
           {
             label: 'Dataset ' + k ,
+            color: plotFontColor,
             data: [],
             borderColor: colorList[k % colorList.length],
             backgroundColor: colorList[k % colorList.length],

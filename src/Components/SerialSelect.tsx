@@ -53,6 +53,12 @@ function SimpleDialog(props: SerialDialogProps) {
   );
 }
 
+const selectStyles = {
+  marginTop: '8px',
+  marginBottom: '8px'
+};
+
+
 export function SerialPortsList() {
   // This component includes the button that allows you to select the port
   // It also renders the dialog when the state "open" is true
@@ -106,7 +112,7 @@ export function SerialPortsList() {
   }
 
   return (
-    <div>
+    <div style={selectStyles}>
       {setSerialButton}
       {startStopButton}
       <Typography variant="subtitle1" component="div">
