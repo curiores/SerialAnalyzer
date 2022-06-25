@@ -1,15 +1,21 @@
 import React from 'react';
 import { Line } from 'react-chartjs-2';
-import { SerialDataObject } from '../SerialData/SerialData';
 
+import { fft } from 'fft-js';
+
+import { SerialDataObject } from '../SerialData/SerialData';
 import { colorList } from '../Resources/colorList.js';
-import { reformatData } from '../Utils/DataUtils.js';
+import { reformatDataVec, nextPowerOf2 } from '../Utils/DataUtils.js';
+
+import { hann } from "fft-windowing";
+
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
+  LogarithmicScale,
   Title,
   Tooltip,
   Legend,
@@ -20,12 +26,18 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
+  LogarithmicScale,
   Title,
   Tooltip,
   Legend
 );
   
-var refreshRate = 32; // In ms
+var fftUtil = require('fft-js').util;
+
+// --------------------------------------------------------------------
+
+var refreshRate = 100; // In ms
+var sampleRate = 1000; // Samples per second
 var padChars = 10; // How many characters to pad with
 
 var gridColor = 'rgba(100,100,100,0.3)';
@@ -38,6 +50,33 @@ const divStyle = {
   margin: 'auto'
 };
 
+function createSpectrum(xvec,yarray,yindex){
+
+  // Create the vector of values
+  var f = [];
+  for(var k = 0; k < xvec.length; k++){
+    if(isNaN(yarray[k][yindex])){
+      yarray[k][yindex] = 0;
+    }
+    f.push(yarray[k][yindex]);
+  }
+ 
+  // Use the window
+  var fwindowed = hann(f, 0.5);
+
+  // Now padd with zeros so fft-js doesn't fail
+  var Npadded = nextPowerOf2(fwindowed.length);
+  for( var k = xvec.length; k < Npadded; k++ ){
+    fwindowed.push(0);
+  }
+  
+  // Take the fft of the values
+  var fhat = fft(fwindowed);
+  var freq = fftUtil.fftFreq(fhat, sampleRate);
+  var mag = fftUtil.fftMag(fhat); 
+
+  return reformatDataVec(freq,mag);
+}
 var data = {
   labels: [],
   datasets: [],
@@ -78,15 +117,16 @@ var defaultChartOptions = {
           }
       },
       y: {
-        type: 'linear',
-        min: -3,
-        max: 3,
+        type: 'logarithmic',
+        min: 0.001,
+        max: 1000,
         grid: {
           color: gridColor,
           borderColor: axisColor
         },
         ticks:{
           color: plotFontColor,
+          format: {maximumSignificantDigits: 3 },
           callback: (val) => ( val.toString().padStart( padChars - val.toString().length, " ") )
         }
     }
@@ -94,7 +134,7 @@ var defaultChartOptions = {
 };
 
 
-export default class SerialChart extends React.Component{
+export default class Spectrum extends React.Component{
      
   constructor(props){
     super(props)
@@ -119,7 +159,7 @@ export default class SerialChart extends React.Component{
         // Add a new dataset if its too short
         chart.data.datasets.push(
           {
-            label: 'Col ' + (k+1) ,
+            label: "Col " + (k+1).toString(),
             color: plotFontColor,
             data: [],
             borderColor: colorList[k % colorList.length],
@@ -136,12 +176,14 @@ export default class SerialChart extends React.Component{
 
       // Update with data from the serial port
       for(var k = 0; k < nvars; k++){
-        chart.data.datasets[k].data = reformatData(SerialDataObject.dataIdx,SerialDataObject.data,k);   
+        chart.data.datasets[k].data = createSpectrum(SerialDataObject.dataIdx,SerialDataObject.data,k);   
       }
 
       // Update options
       var newOps = defaultChartOptions;
-      newOps.scales.x.max = SerialDataObject.bufferSize;
+      var xMax = Math.round(chart.data.datasets[0].data[chart.data.datasets[0].data.length-1].x);      
+      newOps.scales.x.max = xMax;
+
       newOps.plugins.title.text=SerialDataObject.port.friendlyName;
       chart.options = newOps;
 

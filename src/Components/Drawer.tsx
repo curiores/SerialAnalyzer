@@ -22,6 +22,7 @@ import MailIcon from '@mui/icons-material/Mail';
 
 import {SerialPortsList, SerialDialogProps} from './SerialSelect.tsx';
 import SerialChart from './SerialChart.js';
+import Spectrum from './Spectrum.js';
 import { red } from '@mui/material/colors';
 
 
@@ -100,7 +101,8 @@ const styles = {
     },
     customizedMain:{
         marginTop: '76px',
-        display:'flex'
+        display:'flex',
+        flexDirection:'column'
     }
 };
 
@@ -190,9 +192,9 @@ export default function PersistentDrawerLeft() {
         </List>
       </Drawer>
       <Main open={open} style={styles.customizedMain} >
-            <DrawerHeader style={styles.customizedDrawerHeader} />
-                
-            <SerialChart />
+               
+           <SerialChart/> 
+            <Spectrum />
  
       </Main>
     </Box>
