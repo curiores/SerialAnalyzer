@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="view2424.svg"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   width="24"
+   height="24"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs8">
+    <marker
+       style="overflow:visible"
+       id="TriangleOutS"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="TriangleOutS"
+       inkscape:isstock="true">
+      <path
+         transform="scale(0.2)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path12068" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="TriangleOutS-6"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="TriangleOutS"
+       inkscape:isstock="true">
+      <path
+         transform="scale(0.2)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path12068-1" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     id="namedview6"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     inkscape:zoom="25.721009"
+     inkscape:cx="17.417668"
+     inkscape:cy="14.404567"
+     inkscape:window-width="2296"
+     inkscape:window-height="1111"
+     inkscape:window-x="681"
+     inkscape:window-y="358"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg4" />
+  <path
+     id="path1238"
+     style="color:#000000;fill:#9aa0a6;stroke-linecap:square;stroke-miterlimit:6;-inkscape-stroke:none"
+     d="M 1.9101562 2.1347656 L 1.7695312 2.3769531 L 0.40625 4.7363281 L 1.2988281 4.7363281 L 1.2988281 19.964844 L 1.2988281 20.576172 L 1.9101562 20.576172 L 2.5214844 20.576172 L 21.210938 20.576172 L 21.210938 21.470703 L 23.814453 19.964844 L 23.570312 19.824219 L 21.210938 18.460938 L 21.210938 19.355469 L 2.5214844 19.355469 L 2.5214844 17.320312 L 2.6074219 17.498047 C 3.7726981 17.015222 4.2120869 16.076664 4.5878906 15.623047 A 1.0395352 0.96216167 0 0 0 4.6132812 15.589844 C 5.6752754 14.189294 6.5842866 12.630997 7.1230469 10.931641 C 7.1871462 11.093238 7.2553064 11.250725 7.3300781 11.402344 C 8.3025664 13.405838 10.29754 14.613575 12.240234 15.330078 A 1.0395352 0.96216167 0 0 0 12.242188 15.330078 C 15.385639 16.485799 18.684684 16.962176 21.880859 17.371094 A 1.0395352 0.96216167 0 0 0 21.888672 17.371094 C 22.176164 17.405957 22.463063 17.44044 22.75 17.472656 L 23 15.5625 C 22.719294 15.530983 22.439628 15.498728 22.160156 15.464844 L 22.158203 15.462891 C 18.992074 15.057715 15.865851 14.592871 13.009766 13.542969 C 13.009766 13.542969 13.007812 13.542969 13.007812 13.542969 C 11.363241 12.936241 9.8809959 11.967781 9.2246094 10.613281 A 1.0395352 0.96216167 0 0 0 9.2226562 10.605469 C 8.8612135 9.8735715 8.5805111 8.5238318 8.4179688 7.203125 C 8.255426 5.8824182 8.1855175 4.5889533 8.0996094 3.7597656 A 1.0395352 0.96216167 0 0 0 7.0449219 2.890625 A 1.0395352 0.96216167 0 0 0 6.0273438 3.796875 C 6.0273438 3.796875 5.7736084 7.6222584 5.4179688 9.2695312 A 1.0395352 0.96216167 0 0 0 5.4140625 9.2929688 C 5.0658081 11.135139 4.1251041 12.882602 2.9160156 14.478516 C 2.7308657 14.703009 2.662905 14.731838 2.5214844 14.908203 L 2.5214844 7.0371094 L 2.5214844 4.7363281 L 3.4140625 4.7363281 L 1.9101562 2.1347656 z " />
+  <g
+     style="font-style:normal;font-weight:normal;font-size:12px;font-family:Dialog;color-interpolation:linearRGB;fill:#0072bd;fill-opacity:1;stroke:#9aa0a6;stroke-width:30.3165;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:optimizeQuality;image-rendering:optimizeQuality;shape-rendering:auto;text-rendering:geometricPrecision"
+     id="g17845"
+     transform="matrix(0.03558642,0,0,0.03293769,0.93539824,1.0772139)" />
+</svg>

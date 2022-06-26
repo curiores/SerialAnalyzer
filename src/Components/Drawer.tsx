@@ -24,7 +24,8 @@ import {SerialPortsList, SerialDialogProps} from './SerialSelect.tsx';
 import SerialChart from './SerialChart.js';
 import Spectrum from './Spectrum.js';
 import { red } from '@mui/material/colors';
-
+import {ToggleButtonNotEmpty} from './ChartSelector.tsx';
+import { SerialDataObject } from '../SerialData/SerialData';
 
 const drawerWidth = 240;
 var bgToolbar = '#0E4069';
@@ -80,7 +81,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 }));
 
 const styles = {
-    customizeToolbar: {
+    customizedAppBar: {
         top: '34px',
         backgroundColor: bgToolbar
     },
@@ -101,8 +102,10 @@ const styles = {
     },
     customizedMain:{
         marginTop: '76px',
-        display:'flex',
-        flexDirection:'column'
+        height: '100 vh',
+    },
+    customizedToolbar:{
+        justifyContent:'space-between'
     }
 };
 
@@ -110,6 +113,9 @@ const styles = {
 export default function PersistentDrawerLeft() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(true);
+  const [selectedPlots, setSelectedPlots] = React.useState(['Plot']);
+
+  const mainRef = React.useRef(null); 
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -119,24 +125,51 @@ export default function PersistentDrawerLeft() {
     setOpen(false);
   };
 
+  function selectedPlotsChanged(buttonPlots){
+    setSelectedPlots(buttonPlots); 
+
+    // This code determines how large the subplots will be
+    var mainHeight = mainRef.current.clientHeight;
+    SerialDataObject.chartHeightRatio = 0.9/buttonPlots.length;
+
+  }
+
+  var serialChart = null;
+  var spectrum = null;
+  var monitor = null;
+  if(selectedPlots.includes('Plot')) 
+    serialChart = <SerialChart />;
+  if(selectedPlots.includes('Spectrum')) 
+    spectrum = <Spectrum/>;
+  if(selectedPlots.includes('Monitor'))
+    monitor = <Spectrum />;
+
   return (
     <Box sx={{ display: 'flex', height:'100vh' }}>
         
       <CssBaseline />
-      <AppBar open={open}  style={styles.customizeToolbar} >
-        <Toolbar variant="dense" >
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={{ mr: 2, ...(open && { display: 'none' }) }}
-          >
+      <AppBar open={open}  style={styles.customizedAppBar} >
+        <Toolbar variant="dense"  style={styles.customizedToolbar} >
+          {/* HAMBURGER */}
+          <div>
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                onClick={handleDrawerOpen}
+                edge="start"
+                sx={{ mr: 2, ...(open && { display: 'none' }) }}
+              >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Options
-          </Typography>
+          </div>
+
+          {/* CHART SELECT */}
+          <ToggleButtonNotEmpty onChange={selectedPlotsChanged}/>
+
+          {/* PAUSE/STOP/PLAY */}
+          <div>
+
+          </div>
         </Toolbar>
       </AppBar>
     
@@ -191,10 +224,12 @@ export default function PersistentDrawerLeft() {
              
         </List>
       </Drawer>
-      <Main open={open} style={styles.customizedMain} >
+      <Main open={open} style={styles.customizedMain} ref={mainRef}>
                
-           <SerialChart/> 
-            <Spectrum />
+           {/*Conditionally render the views*/}
+           {serialChart}
+           {spectrum}
+           {monitor}
  
       </Main>
     </Box>

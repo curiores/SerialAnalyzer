@@ -9,7 +9,8 @@ export var SerialDataObject = {
     bufferSize: 1000,
     data: [],
     dataIdx: [],
-    serialObj: null
+    serialObj: null,
+    chartHeightRatio: 1
 }
 
 export function SetSerialDefaults(){
