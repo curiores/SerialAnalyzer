@@ -5,27 +5,21 @@ import Drawer from '@mui/material/Drawer';
 import CssBaseline from '@mui/material/CssBaseline';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
-import List from '@mui/material/List';
-import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
+
 
 
 import {SerialPortsList, SerialDialogProps} from './SerialSelect.tsx';
 import SerialChart from './SerialChart.js';
 import Spectrum from './Spectrum.js';
-import { red } from '@mui/material/colors';
-import {ToggleButtonNotEmpty} from './ChartSelector.tsx';
+import Monitor from './Monitor.js';
+import { ToggleButtonNotEmpty } from './ChartSelector.tsx';
 import { SerialDataObject } from '../SerialData/SerialData';
+import SerialPause from './SerialPause.tsx';
 
 const drawerWidth = 240;
 var bgToolbar = '#0E4069';
@@ -88,6 +82,7 @@ const styles = {
     customizedDrawerHeader:{
         marginTop:'34px',
         minHeight:'48px',
+        justifyContent:'space-between',
         color:'rgb(180,180,180)'
     },
     customizedFlex:{
@@ -95,13 +90,19 @@ const styles = {
         flex: '1 0 90%;'
     },
     lightColor:{
-        color: 'rgb(180,180,180)'
+        color: 'rgb(220,220,200)'
     },
     customizedDivider:{
         background: 'rgb(80,80,80)'
     },
+    sepStyle:{
+      background: 'rgb(80,80,80)',
+      height: '1px',
+      margin: '0px 0px',
+      padding: '0px'
+    },
     customizedMain:{
-        marginTop: '76px',
+        marginTop: '90px',
         height: '100 vh',
     },
     customizedToolbar:{
@@ -115,8 +116,6 @@ export default function PersistentDrawerLeft() {
   const [open, setOpen] = React.useState(true);
   const [selectedPlots, setSelectedPlots] = React.useState(['Plot']);
 
-  const mainRef = React.useRef(null); 
-
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -128,10 +127,19 @@ export default function PersistentDrawerLeft() {
   function selectedPlotsChanged(buttonPlots){
     setSelectedPlots(buttonPlots); 
 
-    // This code determines how large the subplots will be
-    var mainHeight = mainRef.current.clientHeight;
-    SerialDataObject.chartHeightRatio = 0.9/buttonPlots.length;
-
+    var n = buttonPlots.length;
+    if(n == 1){
+      SerialDataObject.chartHeightRatio = 0.95;
+      SerialDataObject.chartMarginRatio = 0.0;
+    }
+    else if(n == 2){
+      SerialDataObject.chartHeightRatio = 0.925/n;
+      SerialDataObject.chartMarginRatio = 0.02;
+    }
+    else{
+      SerialDataObject.chartHeightRatio = 0.9/n;
+      SerialDataObject.chartMarginRatio = 0.02;
+    }
   }
 
   var serialChart = null;
@@ -142,7 +150,7 @@ export default function PersistentDrawerLeft() {
   if(selectedPlots.includes('Spectrum')) 
     spectrum = <Spectrum/>;
   if(selectedPlots.includes('Monitor'))
-    monitor = <Spectrum />;
+    monitor = <Monitor />;
 
   return (
     <Box sx={{ display: 'flex', height:'100vh' }}>
@@ -151,7 +159,7 @@ export default function PersistentDrawerLeft() {
       <AppBar open={open}  style={styles.customizedAppBar} >
         <Toolbar variant="dense"  style={styles.customizedToolbar} >
           {/* HAMBURGER */}
-          <div>
+          <div style={{minWidth:"48px"}}>
               <IconButton
                 color="inherit"
                 aria-label="open drawer"
@@ -167,9 +175,7 @@ export default function PersistentDrawerLeft() {
           <ToggleButtonNotEmpty onChange={selectedPlotsChanged}/>
 
           {/* PAUSE/STOP/PLAY */}
-          <div>
-
-          </div>
+          <SerialPause/>
         </Toolbar>
       </AppBar>
     
@@ -189,47 +195,25 @@ export default function PersistentDrawerLeft() {
         open={open}
       >
         <DrawerHeader style={styles.customizedDrawerHeader} >
-          <IconButton onClick={handleDrawerClose} style={styles.lightColor}>
+          <div style={{color:'white', fontSize:'0.9rem', userSelect: 'none'}}> &nbsp; Settings </div>
+          <IconButton onClick={handleDrawerClose} style={{color:'white'}}>
             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
+          
         </DrawerHeader>
         <Divider style={styles.customizedDivider} />
         <SerialPortsList />
         <Divider style={styles.customizedDivider} />
-        <List >
-          {['Option', 'Another one', 'Moar', 'Here'].map((text, index) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton>
-                <ListItemIcon style={styles.lightColor}>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-        <Divider style={styles.customizedDivider} />
-        <List>
-          {['others', 'ooooo'].map((text, index) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton>
-                <ListItemIcon style={styles.lightColor}>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-     
-            </ListItem>
-          ))}
-             
-        </List>
+
       </Drawer>
-      <Main open={open} style={styles.customizedMain} ref={mainRef}>
+      <Main open={open} style={styles.customizedMain} >
                
            {/*Conditionally render the views*/}
            {serialChart}
            {spectrum}
            {monitor}
+
+        
  
       </Main>
     </Box>

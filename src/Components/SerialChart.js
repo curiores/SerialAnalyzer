@@ -25,7 +25,7 @@ ChartJS.register(
   Legend
 );
   
-var refreshRate = 32; // In ms
+var refreshRate = 50; // In ms
 var padChars = 10; // How many characters to pad with
 
 var gridColor = 'rgba(100,100,100,0.3)';
@@ -110,10 +110,10 @@ export default class SerialChart extends React.Component{
       // Get the reference to the chart object
       var chart = this.chartRef.current;
 
-      if(chart !== null)
+      if(chart !== null )
       {
 
-        if(SerialDataObject.data.length !== 0 ){
+        if(SerialDataObject.data.length !== 0 && !SerialDataObject.pauseFlag ){
           
           // Get the size of the data
           var nel = SerialDataObject.data.length;
@@ -166,12 +166,17 @@ export default class SerialChart extends React.Component{
     }
   }
 
+  timer = null;
   componentDidMount(){
     // This will refresh the chart as often as indiciated
     // in the variable refreshRate
-    setInterval(() => {
+    this.timer = setInterval(() => {
       this.updateChart();
     }, refreshRate); 
+  }
+
+  componentWillUnmount(){
+    clearInterval(this.timer);
   }
 
   // Render the chart component (this only updates when the chart is created)

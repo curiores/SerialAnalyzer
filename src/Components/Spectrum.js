@@ -9,6 +9,7 @@ import { reformatDataVec, nextPowerOf2 } from '../Utils/DataUtils.js';
 
 import { hann } from "fft-windowing";
 
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -36,8 +37,9 @@ var fftUtil = require('fft-js').util;
 
 // --------------------------------------------------------------------
 
-var refreshRate = 100; // In ms
-var sampleRate = 1000; // Samples per second
+var refreshRate = 150; // In ms
+
+
 var padChars = 10; // How many characters to pad with
 
 var gridColor = 'rgba(100,100,100,0.3)';
@@ -50,7 +52,9 @@ const divStyle = {
   flex: '1 1 auto'
 };
 
-function createSpectrum(xvec,yarray,yindex){
+
+// Creates the spectrum
+function createSpectrum(xvec,yarray,yindex,sampleRate){
 
   // Create the vector of values
   var f = [];
@@ -151,10 +155,10 @@ export default class Spectrum extends React.Component{
       // Get the reference to the chart object
       var chart = this.chartRef.current;
 
-      if(chart !== null)
+      if(chart !== null )
       {
 
-        if(SerialDataObject.data.length !== 0 ){
+        if(SerialDataObject.data.length !== 0 && !SerialDataObject.pauseFlag){
           
           // Get the size of the data
           var nel = SerialDataObject.data.length;
@@ -181,22 +185,24 @@ export default class Spectrum extends React.Component{
             chart.data.datasets.pop();
           }
 
-      
+          // Compute the sample rate
+          var sampleRate = SerialDataObject.sampleRate;
+
           // Update with data from the serial port
           for(var k = 0; k < nvars; k++){
-            chart.data.datasets[k].data = createSpectrum(SerialDataObject.dataIdx,SerialDataObject.data,k);   
+            chart.data.datasets[k].data = createSpectrum(SerialDataObject.dataIdx,SerialDataObject.data,k,sampleRate);   
           }
 
+          // Pull the chart data range
+          var xMax = Math.round(chart.data.datasets[0].data[chart.data.datasets[0].data.length-1].x);      
         }
 
         // Update options
         var newOps = defaultChartOptions;
-        var xMax = Math.round(chart.data.datasets[0].data[chart.data.datasets[0].data.length-1].x);      
-        newOps.scales.x.max = xMax;
-
+        if(xMax !== undefined){
+          newOps.scales.x.max = xMax;
+        }
         newOps.plugins.title.text=SerialDataObject.port.friendlyName;
-
-
         chart.options = newOps;
   
         // Need to set the height by hand
@@ -205,6 +211,7 @@ export default class Spectrum extends React.Component{
         // (ref: https://www.chartjs.org/docs/2.7.2/general/responsive.html#important-note)
         var parentHeight = this.divRef.current.parentElement.clientHeight;
         this.divRef.current.style.height = SerialDataObject.chartHeightRatio*parentHeight + 'px';
+        this.divRef.current.style.marginTop =  SerialDataObject.chartMarginRatio*parentHeight + 'px';
 
         // Call the update
         chart.update();
@@ -212,13 +219,20 @@ export default class Spectrum extends React.Component{
     }
   }
 
+  timer = null;
+
   componentDidMount(){
     // This will refresh the chart as often as indiciated
     // in the variable refreshRate
-    setInterval(() => {
+    this.timer = setInterval(() => {
       this.updateChart();
     }, refreshRate); 
   }
+
+  componentWillUnmount(){
+    clearInterval(this.timer);
+  }
+
 
   // Render the chart component (this only updates when the chart is created)
   render(){
