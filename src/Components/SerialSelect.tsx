@@ -10,10 +10,11 @@ import Dialog from '@mui/material/Dialog';
 import CableIcon from '@mui/icons-material/Cable';
 import Typography from '@mui/material/Typography';
 import { indigo } from '@mui/material/colors';
-import { SerialDataObject, StartSerial, SerialStopped } from '../SerialData/SerialData';
+import { SerialDataObject, StartSerial, SerialStopped } from '../Utils/SerialData';
 
 const { SerialPort } = window.require("serialport");
 
+const titleFs = "0.9rem";
 var portsDefault: any = [{path:"None"}];
 var ports: any = portsDefault;
 
@@ -116,7 +117,7 @@ export function SerialPortsList() {
   return (
     <div style={selectStyles}>
       <SetSerialButton handleClickOpen={handleClickOpen} />
-      <Typography variant="subtitle1" component="div" style={{fontSize:'0.9rem'}}>
+      <Typography variant="subtitle1" component="div" style={{fontSize:titleFs}}>
         Current: {SerialDataObject.port.friendlyName}
       </Typography>
       <SimpleDialog

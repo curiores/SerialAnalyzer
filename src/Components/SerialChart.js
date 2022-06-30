@@ -1,9 +1,10 @@
 import React from 'react';
 import { Line } from 'react-chartjs-2';
-import { SerialDataObject } from '../SerialData/SerialData';
+import { SerialDataObject } from '../Utils/SerialData';
 
 import { colorList } from '../Resources/colorList.js';
-import { reformatData } from '../Utils/DataUtils.js';
+import { reformatData, autoResize } from '../Utils/DataUtils.js';
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,6 +15,8 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+
+import { GlobalSettings } from '../Utils/GlobalSettings.js';
 
 ChartJS.register(
   CategoryScale,
@@ -107,6 +110,7 @@ export default class SerialChart extends React.Component{
 
     if(this.chartRef !== null ){
 
+     
       // Get the reference to the chart object
       var chart = this.chartRef.current;
 
@@ -146,9 +150,15 @@ export default class SerialChart extends React.Component{
           }
         }
 
+        // If the settings include automatic resizing, perform that here
+        autoResize();
+
+
         // Update options
         var newOps = defaultChartOptions;
         newOps.scales.x.max = SerialDataObject.bufferSize;
+        newOps.scales.y.max = GlobalSettings.timeSeries.ymax;
+        newOps.scales.y.min = GlobalSettings.timeSeries.ymin;
         newOps.plugins.title.text=SerialDataObject.port.friendlyName;
 
         chart.options = newOps;

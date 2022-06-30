@@ -3,7 +3,7 @@ import { Line } from 'react-chartjs-2';
 
 import { fft } from 'fft-js';
 
-import { SerialDataObject } from '../SerialData/SerialData';
+import { SerialDataObject } from '../Utils/SerialData';
 import { colorList } from '../Resources/colorList.js';
 import { reformatDataVec, nextPowerOf2 } from '../Utils/DataUtils.js';
 

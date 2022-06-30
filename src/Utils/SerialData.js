@@ -1,4 +1,6 @@
 
+import { GlobalSettings } from "./GlobalSettings.js";
+
 const { SerialPort } = window.require("serialport");
 const { ReadlineParser } = window.require('@serialport/parser-readline')
 const { performance } = window.require('perf_hooks');
@@ -7,7 +9,7 @@ const { performance } = window.require('perf_hooks');
 export var SerialDataObject = {
     port:{path:null, friendlyName:"None"}, // The port name
     baudRate: 9600,
-    bufferSize: 3000,
+    bufferSize: 500,
     monitorBuffer: 100,
     pauseFlag: false, // when this is true, the data continues to stream, but plots do not update
     data: [],
@@ -86,7 +88,7 @@ function serialSetup(){
             }
         }
         
-        // Push the raw data
+        // Push the raw data (unless its NaN)
         SerialDataObject.rawData.push(data);
         if( SerialDataObject.rawData.length >= SerialDataObject.monitorBuffer){
         // If the buffer is full, remove the first line of the raw data
@@ -97,23 +99,29 @@ function serialSetup(){
         var splitData = data.split(/\s+|,\s+/);
         var nums = splitData.map(parseFloat);
 
-        // Push the data into the data array
-        SerialDataObject.data.push(nums);
+        // Push the data into the data array (if there arent any NaNs)
+        if( nums.every( (value) => { return !isNaN(value) }) ){
+            SerialDataObject.data.push(nums);
+        }
 
         var n = SerialDataObject.data.length;
-        if( n < SerialDataObject.bufferSize){
-        // If necessary, add to the index data
-        SerialDataObject.dataIdx = idxData(n);
-        }
-        else{
-        // If the data has filled the buffer, 
-        // remove the first point
-        SerialDataObject.data.shift();
-
+        if( n > SerialDataObject.bufferSize){
+            // If the data has filled the buffer, resize it
+            SerialDataObject.data = SerialDataObject.data.slice(n-SerialDataObject.bufferSize,n);
+            if(!GlobalSettings.timeSeries.scroll){
+                SerialDataObject.data = [];
+                
+            }
         }        
+        // Create the index data of the correct size
+        var n = SerialDataObject.data.length;
+        SerialDataObject.dataIdx = idxData(n);
+   
     }
 
 }
+
+
 
 
 // Sample rate computations

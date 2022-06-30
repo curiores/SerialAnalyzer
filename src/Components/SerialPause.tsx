@@ -6,7 +6,7 @@ import PauseCircleIcon from '@mui/icons-material/PauseCircle';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import { styled } from "@mui/material/styles";
 
-import { SerialDataObject, StartSerial } from '../SerialData/SerialData';
+import { SerialDataObject, StartSerial } from '../Utils/SerialData';
 
 const IconButton = styled(MuiIconButton)({
     "&":{

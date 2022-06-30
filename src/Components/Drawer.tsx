@@ -18,12 +18,15 @@ import SerialChart from './SerialChart.js';
 import Spectrum from './Spectrum.js';
 import Monitor from './Monitor.js';
 import { ToggleButtonNotEmpty } from './ChartSelector.tsx';
-import { SerialDataObject } from '../SerialData/SerialData';
+import { SerialDataObject } from '../Utils/SerialData';
 import SerialPause from './SerialPause.tsx';
+import SettingsAccordion from  './SettingsAccordion.tsx'
+import BufferSizeSlider from './BufferSize.tsx';
 
-const drawerWidth = 240;
+const drawerWidth = 300;
 var bgToolbar = '#0E4069';
 var bgDrawer = 'rgb(30,30,30)';
+const titleFs = '0.9rem';
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
   open?: boolean;
@@ -195,16 +198,16 @@ export default function PersistentDrawerLeft() {
         open={open}
       >
         <DrawerHeader style={styles.customizedDrawerHeader} >
-          <div style={{color:'white', fontSize:'0.9rem', userSelect: 'none'}}> &nbsp; Settings </div>
+          <div style={{color:'white', fontSize:titleFs, userSelect: 'none'}}> &nbsp; Settings </div>
           <IconButton onClick={handleDrawerClose} style={{color:'white'}}>
             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
           
-        </DrawerHeader>
-        <Divider style={styles.customizedDivider} />
-        <SerialPortsList />
-        <Divider style={styles.customizedDivider} />
 
+        </DrawerHeader>
+        
+        <Divider style={styles.customizedDivider} />
+        <SettingsAccordion/>
       </Drawer>
       <Main open={open} style={styles.customizedMain} >
                

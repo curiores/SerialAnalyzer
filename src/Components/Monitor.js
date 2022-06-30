@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { SerialDataObject } from '../SerialData/SerialData';
+import { SerialDataObject } from '../Utils/SerialData';
 // --------------------------------------------------------------------
 
-var refreshRate = 100; // In ms
+var refreshRate = 50; // In ms
 
 const divStyle = {
   width: '86%',
@@ -37,15 +37,12 @@ export default class Monitor extends React.Component{
     if(this.textRef !== null && !SerialDataObject.pauseFlag){
 
       // Need to set the height by hand
-      // (Flex doesn't work well for this)
-      // To do so, update the size of the containing div
-      // (ref: https://www.chartjs.org/docs/2.7.2/general/responsive.html#important-note)
+      // for consistency with the chart sizes
       var parentHeight = this.divRef.current.parentElement.clientHeight;
       this.divRef.current.style.marginTop = 0.04*parentHeight + 'px';
       this.divRef.current.style.height = 0.9*SerialDataObject.chartHeightRatio*parentHeight + 'px';
       // this.divRef.current.innerText = this.divRef.current.innerText  + ".... \n";
       this.divRef.current.innerText = SerialDataObject.rawData.join('\n');
-
     }
     
   }
