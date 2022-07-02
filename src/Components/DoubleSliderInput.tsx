@@ -6,7 +6,6 @@ import MuiInput from '@mui/material/Input';
 import Typography from '@mui/material/Typography';
 import { GlobalSettings } from "../Utils/GlobalSettings.js";
 import { styled } from '@mui/material/styles';
-import { ThirtyFpsSharp } from '@mui/icons-material';
 
 
 const Input = styled(MuiInput)`
@@ -26,20 +25,19 @@ export default class DoubleSliderInput extends React.Component{
 
   }
 
- 
    // This is the basic hook function
    setValues(values){
     this.setState((state) =>{
       return {values: values}
      });
    }
-
+   
   setValuesGlobal(){
+
       this.setValues([GlobalSettings[this.props.settingHeader][this.props.setting[0]],
                       GlobalSettings[this.props.settingHeader][this.props.setting[1]]]);
-  }
 
-    
+  }
   sliderChange = (
     event: Event,
     sliderValues: number | number[],
@@ -63,9 +61,7 @@ export default class DoubleSliderInput extends React.Component{
     } else {
       this.valuesChanged(sliderValues as number[]);
     }
-
   };
-
 
   valueChanged(newValue,index){
       var newValues = this.state.values;
@@ -74,24 +70,21 @@ export default class DoubleSliderInput extends React.Component{
   }
 
   valuesChanged(newValues){
-    
     this.setValues(newValues)
     // Also update the global object
-    for(var i = 0; i < 2; i++)
+    for(var i = 0; i < 2; i++){
       GlobalSettings[this.props.settingHeader][this.props.setting[i]] = newValues[i];
-
+    }
+    
   }
-
 
   handleInputChange0 = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.valueChanged(event.target.value === '' ? '' : Number(event.target.value),0);
-    
   };
   handleInputChange1 = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.valueChanged(event.target.value === '' ? '' : Number(event.target.value),1);
   };
 
- 
   render(){
     return(
     <Box >

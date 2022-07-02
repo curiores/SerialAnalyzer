@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { SerialDataObject } from '../Utils/SerialData';
+import { GlobalSettings } from '../Utils/GlobalSettings';
 // --------------------------------------------------------------------
 
 var refreshRate = 50; // In ms
@@ -43,6 +44,8 @@ export default class Monitor extends React.Component{
       this.divRef.current.style.height = 0.9*SerialDataObject.chartHeightRatio*parentHeight + 'px';
       // this.divRef.current.innerText = this.divRef.current.innerText  + ".... \n";
       this.divRef.current.innerText = SerialDataObject.rawData.join('\n');
+      this.divRef.current.style.fontSize = GlobalSettings.monitor.fontSize/12.0*0.85 + "rem";
+
     }
     
   }
@@ -60,6 +63,7 @@ export default class Monitor extends React.Component{
     clearInterval(this.timer);
   }
 
+  // SerialDataObject.Monitor.fontSize/12.0*0.85 + "rem";
   // Render the chart component (this only updates when the chart is created)
   render(){
     return(

@@ -7,7 +7,9 @@ import { SerialDataObject } from '../Utils/SerialData';
 import { colorList } from '../Resources/colorList.js';
 import { reformatDataVec, nextPowerOf2, autoResizeSpectrum } from '../Utils/DataUtils.js';
 
-import { hann } from "fft-windowing";
+import { hann, hamming, cosine, lanczos, gaussian, tukey, 
+         blackman, exact_blackman, kaiser, nuttall, blackman_harris,
+         blackman_nuttall, flat_top } from "fft-windowing";
 
 import { GlobalSettings } from '../Utils/GlobalSettings';
 
@@ -68,8 +70,51 @@ function createSpectrum(xvec,yarray,yindex,sampleRate){
     f.push(yarray[k][yindex]);
   }
  
-  // Use the window
-  var fwindowed = hann(f, 0.5);
+  // Select window
+  var fwindowed = f;
+  switch(GlobalSettings.spectrum.windowFunc){
+    case "hann":
+      fwindowed = hann(f);
+      break;
+    case "hamming":
+      fwindowed = hamming(f);
+      break;
+    case "cosine":
+      fwindowed = cosine(f);
+      break;
+    case "lanczos":
+      fwindowed = lanczos(f);
+      break;
+    case "gaussian":
+      fwindowed = gaussian(f);
+      break;
+    case "tukey":
+      fwindowed = tukey(f);
+      break;  
+    case "blackman":
+      fwindowed = blackman(f);
+      break;  
+    case "exact_blackman":
+      fwindowed = exact_blackman(f);
+      break;  
+    case "kaiser":
+      fwindowed = kaiser(f);
+      break;  
+    case "nuttall":
+      fwindowed = nuttall(f);
+      break;  
+    case "blackman_harris":
+      fwindowed = blackman_harris(f);
+      break;  
+    case "blackman_nuttall":
+      fwindowed = blackman_nuttall(f);
+      break;  
+    case "flat_top":
+      fwindowed = flat_top(f);
+      break;
+    default:
+      fwindowed = f;
+  }
 
   // Now padd with zeros so fft-js doesn't fail
   var Npadded = nextPowerOf2(fwindowed.length);
@@ -201,6 +246,14 @@ export default class Spectrum extends React.Component{
 
           // Compute the sample rate
           var sampleRate = SerialDataObject.sampleRate;
+          if(GlobalSettings.spectrum.useFixedSampleRate){
+            sampleRate = GlobalSettings.spectrum.sampleRate;
+          }
+          else{
+            GlobalSettings.spectrum.sampleRate = sampleRate;
+          }
+          console.log( GlobalSettings.spectrum.useFixedSampleRate )
+
 
           // Update with data from the serial port
           var magMax = 0;
@@ -228,6 +281,7 @@ export default class Spectrum extends React.Component{
         var newOps = defaultChartOptions;
         if(xMax !== undefined && GlobalSettings.spectrum.autoScaleH){
           newOps.scales.x.max = xMax;
+          GlobalSettings.spectrum.fmax = xMax;
         }
         else{
           newOps.scales.x.min = GlobalSettings.spectrum.fmin;

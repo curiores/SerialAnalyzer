@@ -14,7 +14,13 @@ export var GlobalSettings = {
         logScale:true,
         autoScaleV:false,
         autoScaleH:true,
-        NHistory:50
+        NHistory:20,
+        windowFunc:"hann",
+        useFixedSampleRate: false,
+        sampleRate: 100,
+    },
+    monitor:{
+        fontSize:12,
     },
     style:{
         menuFs:"0.8rem",

@@ -10,7 +10,6 @@ export var SerialDataObject = {
     port:{path:null, friendlyName:"None"}, // The port name
     baudRate: 9600,
     bufferSize: 500,
-    monitorBuffer: 100,
     pauseFlag: false, // when this is true, the data continues to stream, but plots do not update
     data: [],
     rawData: [],
@@ -80,7 +79,7 @@ function serialSetup(){
         
         // Push the raw data (unless its NaN)
         SerialDataObject.rawData.push(data);
-        if( SerialDataObject.rawData.length >= SerialDataObject.monitorBuffer){
+        if( SerialDataObject.rawData.length >= SerialDataObject.bufferSize){
         // If the buffer is full, remove the first line of the raw data
         SerialDataObject.rawData.shift();
         }

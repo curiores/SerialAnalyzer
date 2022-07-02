@@ -12,6 +12,7 @@ import BufferSizeSlider from './BufferSize.tsx';
 import {SerialPortsList, SerialDialogProps} from './SerialSelect.tsx';
 import SerialSettings from "./SerialSettings.tsx";
 import SpectrumSettings from "./SpectrumSettings.tsx";
+import MonitorSettings from './MonitorSettings.tsx';
 
 const titleFs = "0.9rem";
 
@@ -103,7 +104,8 @@ export default function SettingsAccordion() {
         </AccordionSummary>
         <AccordionDetails>
           
-          --
+          <MonitorSettings/>
+
         </AccordionDetails>
       </Accordion>
     </ThemeProvider>
