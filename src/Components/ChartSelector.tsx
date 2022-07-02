@@ -35,7 +35,7 @@ const styles = {
 
   
 export function ToggleButtonNotEmpty(props) {
-  const [devices, setDevices] = React.useState(() => ['Plot']);
+  const [devices, setDevices] = React.useState(() => ['Plot','Spectrum']);
   const stateRef = React.useRef();
 
   React.useEffect(()=>{

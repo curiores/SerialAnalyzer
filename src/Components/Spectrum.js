@@ -234,7 +234,7 @@ export default class Spectrum extends React.Component{
                 data: [],
                 borderColor: colorList[k % colorList.length],
                 backgroundColor: colorList[k % colorList.length],
-                borderWidth: 2,
+                borderWidth: GlobalSettings.global.lineThickness,
               },
             )
             k = k + 1;
@@ -242,6 +242,12 @@ export default class Spectrum extends React.Component{
           while(chart.data.datasets.length > nvars ){
             // If there are too many, remove the last one.
             chart.data.datasets.pop();
+          }
+
+          // Line width
+          for (var i = 0; i < chart.data.datasets.length; i++){
+            chart.data.datasets[i].borderWidth = GlobalSettings.global.lineThickness;
+            chart.data.datasets[i].pointRadius = GlobalSettings.global.pointRadius;
           }
 
           // Compute the sample rate
@@ -252,8 +258,6 @@ export default class Spectrum extends React.Component{
           else{
             GlobalSettings.spectrum.sampleRate = sampleRate;
           }
-          console.log( GlobalSettings.spectrum.useFixedSampleRate )
-
 
           // Update with data from the serial port
           var magMax = 0;

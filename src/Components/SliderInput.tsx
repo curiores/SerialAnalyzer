@@ -40,7 +40,7 @@ export default function YMin(props) {
     const setting = props.setting;
     const maxValue = props.maxValue;
     const defaultValue = GlobalSettings[settingHeader][setting];
-    const step = 1;
+    const step = props.step;
     const menuFs = props.menuFs;
     const disabled = props.disabled;
   
@@ -48,15 +48,10 @@ export default function YMin(props) {
       defaultValue,
     );
 
-    
-    React.useEffect(()=>{
-      if(!disabled){
-        setValue(GlobalSettings[settingHeader][setting]);
-      }
-    }) 
-
     function valueChanged(newValue){
         setValue(newValue)
+        // Also update the parent
+        // props.onChange(newValue)
         // Also update the global object
         GlobalSettings[settingHeader][setting] = newValue;
     }

@@ -15,22 +15,13 @@ const formStyle = {
   
 export default function MonitorSettings(){
 
-    const [values, setValues] = React.useState({
-        fontSize:12,
-    })
-
-    const{ fontSize } = values;
-
-    React.useEffect(()=>{
-        GlobalSettings.monitor.fontSize = values.fontSize;
-    }) 
-
     return(
         <div>
             <SliderInput
                 disabled={false}
-                minValue={0}
+                minValue={2}
                 maxValue={20}
+                step={1}
                 menuFs={menuFs}
                 settingHeader={"monitor"}
                 setting={"fontSize"}

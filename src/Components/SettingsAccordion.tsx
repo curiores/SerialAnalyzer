@@ -7,8 +7,8 @@ import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import BufferSizeSlider from './BufferSize.tsx';
 
+import GlobalSettingsPane from "./GlobalSettingsPane.tsx";
 import {SerialPortsList, SerialDialogProps} from './SerialSelect.tsx';
 import SerialSettings from "./SerialSettings.tsx";
 import SpectrumSettings from "./SpectrumSettings.tsx";
@@ -73,9 +73,9 @@ export default function SettingsAccordion() {
           <Typography style={{fontSize:titleFs}}>Global</Typography>
         </AccordionSummary>
         <AccordionDetails >
-          <SerialPortsList />
+        
+          <GlobalSettingsPane />
 
-          <BufferSizeSlider />
         </AccordionDetails>
       </Accordion>
       <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')} >

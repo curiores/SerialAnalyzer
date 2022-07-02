@@ -41,7 +41,7 @@ export function StartSerial(){
     if(SerialDataObject.serialObj !== null){
         // Close the serial port
         SerialDataObject.serialObj.close((err) => {
-            console.log("Stop?" + err)
+            console.log("Stop serial port? Error:" + err)
             serialSetup();
         });
     }else{
@@ -51,18 +51,32 @@ export function StartSerial(){
     
 }
 
+var decIndex = 1; // Decides when to decimate
+
 function serialSetup(){
     
     // Starts the serial port
     SerialDataObject.serialObj = new SerialPort({path: SerialDataObject.port.path, 
-                                                baudRate:SerialDataObject.baudRate});
+                                                baudRate:SerialDataObject.baudRate} );
+
     // Parser    
     const parser = SerialDataObject.serialObj.pipe(new ReadlineParser({ delimiter: '\r\n' }))
 
     // Run the parser to collect data
     var onVal = parser.on('data',addData)
 
+
     function addData(data){
+        
+        // If there is decimation, don't add the data until the decimation index is reached
+        if(decIndex >= GlobalSettings.global.decimation){
+            decIndex = 1;
+        }else{
+            decIndex += 1;
+            return;
+        }
+
+        //--------------------- regular update --------------------- //
 
         SerialDataObject.Iter += 1;// Iterate 
 
@@ -121,18 +135,6 @@ function serialSetup(){
 }
 
 
-
-
-// Sample rate computations
-
-function computeSampleRate(){
-  var sampleRate = 0; // Samples per second
-
-  console.log(performance.now())
-  
-
-  return sampleRate;
-}
 
 
 function idxData(n){

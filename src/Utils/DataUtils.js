@@ -1,11 +1,11 @@
 import { GlobalSettings } from "./GlobalSettings.js";
 import { SerialDataObject } from "./SerialData.js";
 
-export function reformatData(xvec,yarray,yindex){
+export function reformatData(xvec,yarray,yindex,step){
     // This creates data arrays of the form [{x:100,y:23.44},{x:100,y:23.44},...]
-    // From the serial data
+    // Uses a step size of step (so it can decimate the data)
     var data = [];
-    for(var k = 0; k < xvec.length; k++){
+    for(var k = 0; k < xvec.length; k=k+step){
       data.push({ x: xvec[k], 
                   y: yarray[k][yindex]})
     }

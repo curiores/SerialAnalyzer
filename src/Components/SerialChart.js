@@ -143,7 +143,7 @@ export default class SerialChart extends React.Component{
                 data: [],
                 borderColor: colorList[k % colorList.length],
                 backgroundColor: colorList[k % colorList.length],
-                borderWidth: 2,
+                borderWidth: GlobalSettings.global.lineThickness,
               },
             )
             k = k + 1;
@@ -153,17 +153,24 @@ export default class SerialChart extends React.Component{
             chart.data.datasets.pop();
           }
 
+          // Line width
+          for (var i = 0; i < chart.data.datasets.length; i++){
+            chart.data.datasets[i].borderWidth = GlobalSettings.global.lineThickness;
+            chart.data.datasets[i].pointRadius = GlobalSettings.global.pointRadius;
+          }
+
           // Update with data from the serial port
           var tnow = SerialDataObject.timeHistory[SerialDataObject.timeHistory.length-1];
           var tvec = (SerialDataObject.timeHistory.map((x)=>{return 1.0e-3*(x-tnow)}));
 
+          var step = 1;
           for(var k = 0; k < nvars; k++){
             if(GlobalSettings.timeSeries.estimateTime){
 
-              chart.data.datasets[k].data = reformatData(tvec,SerialDataObject.data,k);   
+              chart.data.datasets[k].data = reformatData(tvec,SerialDataObject.data,k,step);   
             }
             else{
-              chart.data.datasets[k].data = reformatData(SerialDataObject.dataIdx,SerialDataObject.data,k);   
+              chart.data.datasets[k].data = reformatData(SerialDataObject.dataIdx,SerialDataObject.data,k,step);   
             }
            
             

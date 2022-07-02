@@ -1,4 +1,9 @@
 export var GlobalSettings = {
+    global:{
+        decimation:1,
+        lineThickness:2,
+        pointRadius:0,
+    },
     timeSeries: {
         ymin: -5,
         ymax: 5,
