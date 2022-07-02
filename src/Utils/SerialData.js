@@ -70,21 +70,11 @@ function serialSetup(){
         // Computations for the sample rate (only do this once every NsampleRateUpdate samples)
         if(SerialDataObject.Iter % SerialDataObject.NsampleRateUpdate === 0)
         {
-            SerialDataObject.sampleHistory.push(SerialDataObject.Iter);
-            SerialDataObject.timeHistory.push(performance.now()); 
-
             if(SerialDataObject.sampleHistory.length > 1){
                 var deltaT = SerialDataObject.timeHistory[SerialDataObject.timeHistory.length-1] - SerialDataObject.timeHistory[0];
                 var samples = SerialDataObject.sampleHistory[SerialDataObject.sampleHistory.length-1] - SerialDataObject.sampleHistory[0];
             
                 SerialDataObject.sampleRate = samples/deltaT*1000; 
-            
-                // If the buffer size is exceeded, throw out samples until it is smaller
-                while( samples > SerialDataObject.bufferSize ){
-                    SerialDataObject.sampleHistory.shift();
-                    SerialDataObject.timeHistory.shift();
-                    var samples = SerialDataObject.sampleHistory[SerialDataObject.sampleHistory.length-1] - SerialDataObject.sampleHistory[0];
-                }
             }
         }
         
@@ -100,17 +90,27 @@ function serialSetup(){
         var nums = splitData.map(parseFloat);
 
         // Push the data into the data array (if there arent any NaNs)
+        // also push the sample/time history
         if( nums.every( (value) => { return !isNaN(value) }) ){
             SerialDataObject.data.push(nums);
+            SerialDataObject.sampleHistory.push(SerialDataObject.Iter);
+            SerialDataObject.timeHistory.push(performance.now()); 
         }
+
 
         var n = SerialDataObject.data.length;
         if( n > SerialDataObject.bufferSize){
             // If the data has filled the buffer, resize it
-            SerialDataObject.data = SerialDataObject.data.slice(n-SerialDataObject.bufferSize,n);
+            const resize = (v) =>{
+                return v.slice(v.length-SerialDataObject.bufferSize,v.length);
+            }
+            SerialDataObject.data = resize(SerialDataObject.data);
+            SerialDataObject.sampleHistory = resize(SerialDataObject.sampleHistory);
+            SerialDataObject.timeHistory = resize(SerialDataObject.timeHistory);
             if(!GlobalSettings.timeSeries.scroll){
                 SerialDataObject.data = [];
-                
+                SerialDataObject.sampleHistory = [];
+                SerialDataObject.timeHistory = [];
             }
         }        
         // Create the index data of the correct size

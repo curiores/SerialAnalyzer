@@ -5,10 +5,11 @@ import { fft } from 'fft-js';
 
 import { SerialDataObject } from '../Utils/SerialData';
 import { colorList } from '../Resources/colorList.js';
-import { reformatDataVec, nextPowerOf2 } from '../Utils/DataUtils.js';
+import { reformatDataVec, nextPowerOf2, autoResizeSpectrum } from '../Utils/DataUtils.js';
 
 import { hann } from "fft-windowing";
 
+import { GlobalSettings } from '../Utils/GlobalSettings';
 
 import {
   Chart as ChartJS,
@@ -21,6 +22,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { Global } from '@emotion/react';
 
 ChartJS.register(
   CategoryScale,
@@ -49,7 +51,8 @@ var axisColor = 'rgb(180,180,180)';
 const divStyle = {
   width: '95%',
   margin: 'auto',
-  flex: '1 1 auto'
+  flex: '1 1 auto',
+  display: 'flex',
 };
 
 
@@ -79,8 +82,9 @@ function createSpectrum(xvec,yarray,yindex,sampleRate){
   var freq = fftUtil.fftFreq(fhat, sampleRate);
   var mag = fftUtil.fftMag(fhat); 
 
-  return reformatDataVec(freq,mag);
+  return {freq:freq,mag:mag};
 }
+
 var data = {
   labels: [],
   datasets: [],
@@ -121,7 +125,7 @@ var defaultChartOptions = {
           }
       },
       y: {
-        type: 'logarithmic',
+        type: 'linear',
         min: 0.001,
         max: 1000,
         grid: {
@@ -130,13 +134,21 @@ var defaultChartOptions = {
         },
         ticks:{
           color: plotFontColor,
-          format: {maximumSignificantDigits: 3 },
-          callback: (val) => ( val.toString().padStart( padChars - val.toString().length, " ") )
+          callback: spectrumAxisCallback
         }
     }
   }
 };
 
+function spectrumAxisCallback(label,index,labels){
+  if(GlobalSettings.spectrum.logScale){
+    var slabel = label.toExponential().toString();
+    return slabel.padStart( padChars - slabel.length, " ");
+  }
+  else{
+    return label.toString().padStart( padChars - label.toString().length, " ") ;
+  }
+}
 
 export default class Spectrum extends React.Component{
      
@@ -145,6 +157,8 @@ export default class Spectrum extends React.Component{
     // This chart reference is needed to update the charts
     this.divRef = React.createRef(); 
     this.chartRef = React.createRef(); 
+    this.labelRef = React.createRef();
+
   };
 
   
@@ -189,21 +203,60 @@ export default class Spectrum extends React.Component{
           var sampleRate = SerialDataObject.sampleRate;
 
           // Update with data from the serial port
+          var magMax = 0;
+          var magMin = 0;
           for(var k = 0; k < nvars; k++){
-            chart.data.datasets[k].data = createSpectrum(SerialDataObject.dataIdx,SerialDataObject.data,k,sampleRate);   
+            var s = createSpectrum(SerialDataObject.dataIdx,SerialDataObject.data,k,sampleRate);   
+            if(k===0){
+              magMax = Math.max(...s.mag);
+              magMin = Math.min(...s.mag);
+            }
+            else{
+              magMax = Math.max(magMax,Math.max(...s.mag));
+              magMin = Math.min(magMin,Math.min(...s.mag));
+            }
+            chart.data.datasets[k].data = reformatDataVec(s.freq,s.mag);
           }
 
+          autoResizeSpectrum(magMin,magMax);
+        
           // Pull the chart data range
           var xMax = Math.round(chart.data.datasets[0].data[chart.data.datasets[0].data.length-1].x);      
         }
-
+ 
         // Update options
         var newOps = defaultChartOptions;
-        if(xMax !== undefined){
+        if(xMax !== undefined && GlobalSettings.spectrum.autoScaleH){
           newOps.scales.x.max = xMax;
         }
+        else{
+          newOps.scales.x.min = GlobalSettings.spectrum.fmin;
+          newOps.scales.x.max = GlobalSettings.spectrum.fmax;
+        }
+        newOps.scales.y.min = Math.pow(10,(GlobalSettings.spectrum.pmin)).toPrecision(2);
+        newOps.scales.y.max = Math.pow(10,(GlobalSettings.spectrum.pmax)).toPrecision(2);
+        newOps.scales.y.ticks.min = Math.round(Math.pow(10,(GlobalSettings.spectrum.pmin)));
+        newOps.scales.y.ticks.max = Math.round(Math.pow(10,(GlobalSettings.spectrum.pmax)));
+
+        if(!GlobalSettings.spectrum.logScale){
+          newOps.scales.y.min = Math.round(Math.pow(10,(GlobalSettings.spectrum.pmin)));
+          newOps.scales.y.max = Math.round(Math.pow(10,(GlobalSettings.spectrum.pmax)));
+          newOps.scales.y.type = "linear";
+        }
+        else{
+          
+          newOps.scales.y.type = "logarithmic";
+        }
+
+
+        this.labelRef.current.innerHTML = "f&nbsp;(Hz)"
         newOps.plugins.title.text=SerialDataObject.port.friendlyName;
         chart.options = newOps;
+
+        if( typeof chart.data.datasets[0] === 'undefined'){
+          this.labelRef.current.innerHTML = "";
+        }
+  
   
         // Need to set the height by hand
         // (Flex doesn't work well for this)
@@ -239,6 +292,15 @@ export default class Spectrum extends React.Component{
     return(
       <div style={divStyle} ref={this.divRef}>
          <Line data={data} options={defaultChartOptions} ref={this.chartRef}/>
+         <div style={{marginLeft:"-64px", verticalAlign: "bottom",
+              bottom:"0px",width:"0px",fontSize:"12px",marginBottom:"20px",
+              color:plotFontColor,
+              display: "inline-block",
+              alignSelf: "flex-end",
+              fontFamily:"'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"}}
+              ref={this.labelRef}
+              >
+          </div>
      </div>
     )
   }

@@ -41,9 +41,54 @@ export function autoResize(){
         if(dy > 2){
             nearestValue = 5;
         }
-        
-        GlobalSettings.timeSeries.ymin = Math.floor( (ymid - dyNext)/nearestValue)*nearestValue;
-        GlobalSettings.timeSeries.ymax = Math.ceil( ( ymid + dyNext)/nearestValue)*nearestValue;
+        var yminUpdate = Math.floor( (ymid - dyNext)/nearestValue)*nearestValue;
+        var ymaxUpdate = Math.ceil( ( ymid + dyNext)/nearestValue)*nearestValue;
+
+        if(!isNaN(yminUpdate)){
+            GlobalSettings.timeSeries.ymin = yminUpdate;
+        }
+        if(!isNaN(ymaxUpdate)){
+            GlobalSettings.timeSeries.ymax = ymaxUpdate;
+        }
+    }
+
+}
+
+var minHistory = [];
+var maxHistory = [];
+
+export function autoResizeSpectrum(dataMin,dataMax){
+
+    minHistory.push(dataMin);
+    maxHistory.push(dataMax);
+    if(minHistory.length>GlobalSettings.spectrum.NHistory){
+        minHistory.shift();
+        maxHistory.shift();
+    }
+
+    dataMin = Math.min(...minHistory);
+    dataMax = Math.max(...maxHistory);
+    
+    if(GlobalSettings.spectrum.autoScaleV){
+        var dataMinUpdate = 0;
+        var dataMaxUpdate = 100;
+        if(GlobalSettings.spectrum.logScale){
+            dataMinUpdate = Math.floor(Math.log10(Math.abs(dataMin)));
+            dataMaxUpdate = Math.ceil(Math.log10(Math.abs(dataMax)));
+        }
+        else{
+            dataMinUpdate = -10;
+            dataMaxUpdate = Math.log10(Math.ceil(nextPowerOf2(dataMax)/10)*10);
+        }
+   
+        if(!isNaN(dataMinUpdate)){
+            GlobalSettings.spectrum.pmin = dataMinUpdate;
+        }
+        if(!isNaN(dataMaxUpdate)){
+            GlobalSettings.spectrum.pmax = dataMaxUpdate;
+        }
+
+       
     }
 
 }

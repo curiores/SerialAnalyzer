@@ -17,6 +17,9 @@ import {
 } from 'chart.js';
 
 import { GlobalSettings } from '../Utils/GlobalSettings.js';
+import { Global } from '@emotion/react';
+import { Typography } from '@mui/material';
+import { flexbox } from '@mui/system';
 
 ChartJS.register(
   CategoryScale,
@@ -28,6 +31,7 @@ ChartJS.register(
   Legend
 );
   
+var tlabel = "ss"
 var refreshRate = 50; // In ms
 var padChars = 10; // How many characters to pad with
 
@@ -38,7 +42,8 @@ var axisColor = 'rgb(180,180,180)';
 const divStyle = {
   width: '95%',
   margin: 'auto',
-  position: 'relative'
+  position: 'relative',
+  display: 'flex',
 };
 
 var data = {
@@ -78,6 +83,9 @@ var defaultChartOptions = {
           },
           ticks:{
             color: plotFontColor
+          },
+          title:{ 
+            display:false,
           }
       },
       y: {
@@ -103,6 +111,7 @@ export default class SerialChart extends React.Component{
     // This chart reference is needed to update the charts
     this.divRef = React.createRef(); 
     this.chartRef = React.createRef(); 
+    this.labelRef = React.createRef();
   };
 
 
@@ -145,8 +154,19 @@ export default class SerialChart extends React.Component{
           }
 
           // Update with data from the serial port
+          var tnow = SerialDataObject.timeHistory[SerialDataObject.timeHistory.length-1];
+          var tvec = (SerialDataObject.timeHistory.map((x)=>{return 1.0e-3*(x-tnow)}));
+
           for(var k = 0; k < nvars; k++){
-            chart.data.datasets[k].data = reformatData(SerialDataObject.dataIdx,SerialDataObject.data,k);   
+            if(GlobalSettings.timeSeries.estimateTime){
+
+              chart.data.datasets[k].data = reformatData(tvec,SerialDataObject.data,k);   
+            }
+            else{
+              chart.data.datasets[k].data = reformatData(SerialDataObject.dataIdx,SerialDataObject.data,k);   
+            }
+           
+            
           }
         }
 
@@ -156,12 +176,31 @@ export default class SerialChart extends React.Component{
 
         // Update options
         var newOps = defaultChartOptions;
-        newOps.scales.x.max = SerialDataObject.bufferSize;
+
+        if(GlobalSettings.timeSeries.estimateTime){
+          var nt = SerialDataObject.timeHistory.length;
+          var tnow = SerialDataObject.timeHistory[nt-1];
+          var t0 = SerialDataObject.timeHistory[0];
+          newOps.scales.x.min = 1.0e-3*(t0-tnow)*SerialDataObject.bufferSize/nt;
+          newOps.scales.x.max = 0;
+          this.labelRef.current.innerHTML = "t&nbsp;(s)"
+          // newOps.scales.x.title = { text:"t (sec)", display:true, align:"end", padding:0};
+        }
+        else{
+          newOps.scales.x.min = 0.0;
+          newOps.scales.x.max = SerialDataObject.bufferSize;
+          this.labelRef.current.innerHTML = "&nbsp;n"
+        }
         newOps.scales.y.max = GlobalSettings.timeSeries.ymax;
         newOps.scales.y.min = GlobalSettings.timeSeries.ymin;
         newOps.plugins.title.text=SerialDataObject.port.friendlyName;
 
         chart.options = newOps;
+
+        
+        if( typeof chart.data.datasets[0] === 'undefined'){
+          this.labelRef.current.innerHTML = "";
+        }
   
         // Need to set the height by hand
         // (Flex doesn't work well for this)
@@ -170,6 +209,7 @@ export default class SerialChart extends React.Component{
         var parentHeight = this.divRef.current.parentElement.clientHeight;
         this.divRef.current.style.height =  SerialDataObject.chartHeightRatio*parentHeight + 'px';
 
+        
         // Call the update
         chart.update();
       }
@@ -193,7 +233,19 @@ export default class SerialChart extends React.Component{
   render(){
     return(
       <div style={divStyle} ref={this.divRef}>
-          <Line data={data} options={defaultChartOptions} ref={this.chartRef}/>
+          <Line data={data} options={defaultChartOptions} ref={this.chartRef}>
+          </Line>
+          <div style={{marginLeft:"-64px", verticalAlign: "bottom",
+              bottom:"0px",width:"0px",fontSize:"12px",marginBottom:"20px",
+              color:plotFontColor,
+              display: "inline-block",
+              alignSelf: "flex-end",
+              fontFamily:"'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"}}
+              ref={this.labelRef}
+              >
+              n
+          </div>
+
       </div>
     )
   }

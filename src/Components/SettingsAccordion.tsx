@@ -11,6 +11,7 @@ import BufferSizeSlider from './BufferSize.tsx';
 
 import {SerialPortsList, SerialDialogProps} from './SerialSelect.tsx';
 import SerialSettings from "./SerialSettings.tsx";
+import SpectrumSettings from "./SpectrumSettings.tsx";
 
 const titleFs = "0.9rem";
 
@@ -92,7 +93,8 @@ export default function SettingsAccordion() {
         </AccordionSummary>
         <AccordionDetails>
           
-          --
+          <SpectrumSettings/>
+
         </AccordionDetails>
       </Accordion>
       <Accordion expanded={expanded === 'panel3'} onChange={handleChange('panel3')}>
