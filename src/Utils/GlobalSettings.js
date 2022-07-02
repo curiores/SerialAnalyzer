@@ -3,6 +3,7 @@ export var GlobalSettings = {
         decimation:1,
         lineThickness:2,
         pointRadius:0,
+        firstColumnTime:false,
     },
     timeSeries: {
         ymin: -5,

@@ -1,5 +1,6 @@
 
 import { GlobalSettings } from "./GlobalSettings.js";
+import { ToastContainer, toast } from 'react-toastify';
 
 const { SerialPort } = window.require("serialport");
 const { ReadlineParser } = window.require('@serialport/parser-readline')
@@ -55,6 +56,8 @@ var decIndex = 1; // Decides when to decimate
 
 function serialSetup(){
     
+    toast("Starting Serial on " + SerialDataObject.port.friendlyName + " with baud rate: " + SerialDataObject.baudRate);
+
     // Starts the serial port
     SerialDataObject.serialObj = new SerialPort({path: SerialDataObject.port.path, 
                                                 baudRate:SerialDataObject.baudRate} );
@@ -64,7 +67,6 @@ function serialSetup(){
 
     // Run the parser to collect data
     var onVal = parser.on('data',addData)
-
 
     function addData(data){
         
@@ -91,6 +93,7 @@ function serialSetup(){
             }
         }
         
+
         // Push the raw data (unless its NaN)
         SerialDataObject.rawData.push(data);
         if( SerialDataObject.rawData.length >= SerialDataObject.bufferSize){
@@ -101,13 +104,21 @@ function serialSetup(){
         // Now parse the numeric data
         var splitData = data.split(/\s+|,\s+/);
         var nums = splitData.map(parseFloat);
+        var t = 0;
+        if(GlobalSettings.global.firstColumnTime){
+            t = nums[0];
+            nums = nums.slice(1,nums.length);
+        }
+        else{
+            t = performance.now();
+        }
 
         // Push the data into the data array (if there arent any NaNs)
         // also push the sample/time history
         if( nums.every( (value) => { return !isNaN(value) }) ){
             SerialDataObject.data.push(nums);
             SerialDataObject.sampleHistory.push(SerialDataObject.Iter);
-            SerialDataObject.timeHistory.push(performance.now()); 
+            SerialDataObject.timeHistory.push(t); 
         }
 
 

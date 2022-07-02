@@ -10,7 +10,7 @@ app.allowRendererProcessReuse = false
 function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 950,
-    height: 600,
+    height: 700,
     // Set the path of an additional "preload" script that can be used to
     // communicate between node-land and browser-land.
     titleBarStyle: 'hidden',

@@ -1,7 +1,6 @@
 export var colorList = ["#03A9F4",
                         "#FF7043",
                         "#7E57C2",
-                        "#ffffff",
                         "#66BB6A",
                         "#EF5350",
                         "#FFCA28",

@@ -10,7 +10,8 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 import {SerialPortsList, SerialDialogProps} from './SerialSelect.tsx';
@@ -210,15 +211,23 @@ export default function PersistentDrawerLeft() {
         <SettingsAccordion/>
       </Drawer>
       <Main open={open} style={styles.customizedMain} >
-               
+        <ToastContainer 
+            autoClose={1500}
+            position="bottom-center"
+            className="toast-container" 
+            closeOnClick={true}
+            toastStyle={{ backgroundColor: "rgb(20,20,20)", fontSize:'0.9rem', color: "rgb(200,200,200)" }}
+        />
+
            {/*Conditionally render the views*/}
            {serialChart}
            {spectrum}
            {monitor}
 
         
- 
+           
       </Main>
+    
     </Box>
   );
 }

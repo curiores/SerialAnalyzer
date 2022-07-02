@@ -68,11 +68,12 @@ export default function SettingsAccordion() {
 
   return (
     <ThemeProvider theme={darkTheme}>
+      <div  style={{minHeight: '200px'}}>
       <Accordion expanded={expanded === 'panel0'} onChange={handleChange('panel0')} >
         <AccordionSummary aria-controls="panel0d-content" id="panel0d-header" sx={{ height: summaryHeight, minHeight:summaryHeight}} >
           <Typography style={{fontSize:titleFs}}>Global</Typography>
         </AccordionSummary>
-        <AccordionDetails >
+        <AccordionDetails style={{minHeight: '350px'}}>
         
           <GlobalSettingsPane />
 
@@ -108,6 +109,7 @@ export default function SettingsAccordion() {
 
         </AccordionDetails>
       </Accordion>
+      </div>
     </ThemeProvider>
   );
 }

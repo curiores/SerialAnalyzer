@@ -11,6 +11,7 @@ import {SerialPortsList} from './SerialSelect.tsx';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { SerialDataObject, StartSerial } from '../Utils/SerialData.js';
+import SerialSettings from './SerialSettings.jsx';
 
 const menuFs = GlobalSettings.style.menuFs;
 
@@ -26,6 +27,7 @@ const defaultBaud = '9600';
 export default function GlobalSettingsPane(){
 
     const [baudRate,setBaudRate] = React.useState(SerialDataObject.baudRate);
+    const [firstColumnTime,setFirstColumnTime] = React.useState(GlobalSettings.global.firstColumnTime);
 
     const baudRateChange = ((event: any, newValue: any) => {
      
@@ -42,10 +44,15 @@ export default function GlobalSettingsPane(){
         }
 
     });
-    
+
+    const formChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setFirstColumnTime( event.target.checked);
+        GlobalSettings.global.firstColumnTime = event.target.checked;
+        StartSerial();
+    };
 
     return(
-        <div>
+        <div style={{flexGrow:1}}>
             <SerialPortsList />
             <Autocomplete
                 onChange={baudRateChange} 
@@ -92,6 +99,14 @@ export default function GlobalSettingsPane(){
                 setting={"pointRadius"}
                 name={"Point radius"}                
             />
+             <FormGroup style={formStyle}>
+                <FormControlLabel 
+                    control={<Checkbox checked={firstColumnTime} 
+                                onChange={formChange} 
+                                name="firstColumnTime" 
+                                size="small"/>} 
+                    label={<Typography sx={{ fontSize:menuFs,userSelect:"none"}}>First column is time (in ms)</Typography>} />
+            </FormGroup> 
         </div>
     )
 
