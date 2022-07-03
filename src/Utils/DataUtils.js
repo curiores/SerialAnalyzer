@@ -1,6 +1,11 @@
 import { GlobalSettings } from "./GlobalSettings.js";
 import { SerialDataObject } from "./SerialData.js";
 
+/* These functions are used by the charts. 
+   Right now there's not muchreuse... they are simply here
+   to separate some of the functions that operate on the data
+   from the presentation in Spectrum.js and SerialChart.js
+*/
 export function reformatData(xvec,yarray,yindex,step){
     // This creates data arrays of the form [{x:100,y:23.44},{x:100,y:23.44},...]
     // Uses a step size of step (so it can decimate the data)
@@ -51,12 +56,10 @@ export function autoResize(){
             GlobalSettings.timeSeries.ymax = ymaxUpdate;
         }
     }
-
 }
 
 var minHistory = [];
 var maxHistory = [];
-
 export function autoResizeSpectrum(dataMin,dataMax){
 
     minHistory.push(dataMin);
@@ -87,8 +90,5 @@ export function autoResizeSpectrum(dataMin,dataMax){
         if(!isNaN(dataMaxUpdate)){
             GlobalSettings.spectrum.pmax = dataMaxUpdate;
         }
-
-       
     }
-
 }

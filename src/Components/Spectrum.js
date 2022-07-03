@@ -1,30 +1,21 @@
 import React from 'react';
 import { Line } from 'react-chartjs-2';
-
 import { fft } from 'fft-js';
+import { hann, hamming, cosine, lanczos, gaussian, tukey, 
+  blackman, exact_blackman, kaiser, nuttall, blackman_harris,
+  blackman_nuttall, flat_top } from "fft-windowing";
 
 import { SerialDataObject } from '../Utils/SerialData';
 import { colorList } from '../Resources/colorList.js';
 import { reformatDataVec, nextPowerOf2, autoResizeSpectrum } from '../Utils/DataUtils.js';
-
-import { hann, hamming, cosine, lanczos, gaussian, tukey, 
-         blackman, exact_blackman, kaiser, nuttall, blackman_harris,
-         blackman_nuttall, flat_top } from "fft-windowing";
-
 import { GlobalSettings } from '../Utils/GlobalSettings';
 
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  LogarithmicScale,
-  Title,
-  Tooltip,
-  Legend,
+  Chart as ChartJS, CategoryScale, LinearScale, PointElement,
+  LineElement, LogarithmicScale, Title, Tooltip, Legend,
 } from 'chart.js';
-import { Global } from '@emotion/react';
+
+const fftUtil = require('fft-js').util;
 
 ChartJS.register(
   CategoryScale,
@@ -37,18 +28,12 @@ ChartJS.register(
   Legend
 );
   
-var fftUtil = require('fft-js').util;
-
-// --------------------------------------------------------------------
-
-var refreshRate = 150; // In ms
-
-
-var padChars = 10; // How many characters to pad with
-
-var gridColor = 'rgba(100,100,100,0.3)';
-var plotFontColor = 'rgb(180,180,180)';
-var axisColor = 'rgb(180,180,180)';
+// Settings
+const refreshRate = GlobalSettings.spectrum.refreshRate; // In ms
+const padChars = GlobalSettings.style.plotPadChars; // How many characters to pad with
+const gridColor = GlobalSettings.style.gridColor;
+const plotFontColor = GlobalSettings.style.plotFontColor;
+const axisColor = GlobalSettings.style.axisColor;
 
 const divStyle = {
   width: '95%',
@@ -56,7 +41,6 @@ const divStyle = {
   flex: '1 1 auto',
   display: 'flex',
 };
-
 
 // Creates the spectrum
 function createSpectrum(xvec,yarray,yindex,sampleRate){
@@ -195,6 +179,13 @@ function spectrumAxisCallback(label,index,labels){
   }
 }
 
+
+/* The main spectrum chart component.
+   This file could be refactored to separate some of the background computations
+   from the presentation. However, most of them are tied together,
+   so it wouldn't actually help that much.
+*/
+
 export default class Spectrum extends React.Component{
      
   constructor(props){
@@ -203,22 +194,15 @@ export default class Spectrum extends React.Component{
     this.divRef = React.createRef(); 
     this.chartRef = React.createRef(); 
     this.labelRef = React.createRef();
-
   };
 
-  
   updateChart(){
-    
     if(this.chartRef !== null ){
-
       // Get the reference to the chart object
       var chart = this.chartRef.current;
 
-      if(chart !== null )
-      {
-
+      if(chart !== null ){
         if(SerialDataObject.data.length !== 0 && !SerialDataObject.pauseFlag){
-          
           // Get the size of the data
           var nel = SerialDataObject.data.length;
           var nvars = SerialDataObject.data[nel-1].length;
@@ -306,7 +290,6 @@ export default class Spectrum extends React.Component{
           newOps.scales.y.type = "logarithmic";
         }
 
-
         this.labelRef.current.innerHTML = "f&nbsp;(Hz)"
         newOps.plugins.title.text=SerialDataObject.port.friendlyName;
         chart.options = newOps;
@@ -314,8 +297,7 @@ export default class Spectrum extends React.Component{
         if( typeof chart.data.datasets[0] === 'undefined'){
           this.labelRef.current.innerHTML = "";
         }
-  
-  
+
         // Need to set the height by hand
         // (Flex doesn't work well for this)
         // To do so, update the size of the containing div
@@ -331,7 +313,6 @@ export default class Spectrum extends React.Component{
   }
 
   timer = null;
-
   componentDidMount(){
     // This will refresh the chart as often as indiciated
     // in the variable refreshRate
@@ -343,7 +324,6 @@ export default class Spectrum extends React.Component{
   componentWillUnmount(){
     clearInterval(this.timer);
   }
-
 
   // Render the chart component (this only updates when the chart is created)
   render(){

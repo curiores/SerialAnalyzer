@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
-import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
 import MuiAccordionSummary, { AccordionSummaryProps } from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
@@ -9,13 +8,12 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import GlobalSettingsPane from "./GlobalSettingsPane.tsx";
-import {SerialPortsList, SerialDialogProps} from './SerialSelect.tsx';
 import SerialSettings from "./SerialSettings.tsx";
 import SpectrumSettings from "./SpectrumSettings.tsx";
 import MonitorSettings from './MonitorSettings.tsx';
+import { GlobalSettings } from "../Utils/GlobalSettings.js";
 
-const titleFs = "0.9rem";
-
+const titleFs = GlobalSettings.style.titleFs;
 const summaryHeight = '40px';
 
 const darkTheme = createTheme({
@@ -58,6 +56,9 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   borderTop: '1px solid rgba(0, 0, 0, .125)',
 }));
 
+/* Creates the accordion in which the settings live 
+*/
+
 export default function SettingsAccordion() {
   const [expanded, setExpanded] = React.useState<string | false>('panel0');
 
@@ -74,9 +75,8 @@ export default function SettingsAccordion() {
           <Typography style={{fontSize:titleFs}}>Global</Typography>
         </AccordionSummary>
         <AccordionDetails style={{minHeight: '350px'}}>
-        
+          {/* GLOBAL SETTINGS PANE */}
           <GlobalSettingsPane />
-
         </AccordionDetails>
       </Accordion>
       <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')} >
@@ -84,9 +84,8 @@ export default function SettingsAccordion() {
           <Typography style={{fontSize:titleFs}}>Time Series</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          
+          {/* SERIAL SETTINGS PANE */}
           <SerialSettings/>
-          
         </AccordionDetails>
       </Accordion>
       <Accordion expanded={expanded === 'panel2'} onChange={handleChange('panel2')} >
@@ -94,9 +93,8 @@ export default function SettingsAccordion() {
           <Typography style={{fontSize:titleFs}}>Spectrum</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          
+          {/* SPECTRUM SETTINGS PANE */}
           <SpectrumSettings/>
-
         </AccordionDetails>
       </Accordion>
       <Accordion expanded={expanded === 'panel3'} onChange={handleChange('panel3')}>
@@ -104,9 +102,8 @@ export default function SettingsAccordion() {
           <Typography style={{fontSize:titleFs}}>Monitor</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          
+          {/* MONITOR SETTINGS PANE */}
           <MonitorSettings/>
-
         </AccordionDetails>
       </Accordion>
       </div>

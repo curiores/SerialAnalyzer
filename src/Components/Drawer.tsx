@@ -13,21 +13,19 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-
-import {SerialPortsList, SerialDialogProps} from './SerialSelect.tsx';
 import SerialChart from './SerialChart.js';
 import Spectrum from './Spectrum.js';
 import Monitor from './Monitor.js';
 import { ToggleButtonNotEmpty } from './ChartSelector.tsx';
 import { SerialDataObject } from '../Utils/SerialData';
 import SerialPause from './SerialPause.tsx';
-import SettingsAccordion from  './SettingsAccordion.tsx'
-import BufferSizeSlider from './BufferSize.tsx';
+import SettingsAccordion from './SettingsAccordion.tsx'
+import { GlobalSettings } from '../Utils/GlobalSettings.js';
 
-const drawerWidth = 300;
+const drawerWidth = GlobalSettings.style.drawerWidth;
 var bgToolbar = '#0E4069';
 var bgDrawer = 'rgb(30,30,30)';
-const titleFs = '0.9rem';
+const titleFs = GlobalSettings.style.titleFs;
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
   open?: boolean;
@@ -79,41 +77,45 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 }));
 
 const styles = {
-    customizedAppBar: {
-        top: '34px',
-        backgroundColor: bgToolbar
-    },
-    customizedDrawerHeader:{
-        marginTop:'34px',
-        minHeight:'48px',
-        justifyContent:'space-between',
-        color:'rgb(180,180,180)'
-    },
-    customizedFlex:{
-        background: 'purple',
-        flex: '1 0 90%;'
-    },
-    lightColor:{
-        color: 'rgb(220,220,200)'
-    },
-    customizedDivider:{
-        background: 'rgb(80,80,80)'
-    },
-    sepStyle:{
-      background: 'rgb(80,80,80)',
-      height: '1px',
-      margin: '0px 0px',
-      padding: '0px'
-    },
-    customizedMain:{
-        marginTop: '90px',
-        height: '100 vh',
-    },
-    customizedToolbar:{
-        justifyContent:'space-between'
-    }
+  customizedAppBar: {
+    top: '34px',
+    backgroundColor: bgToolbar
+  },
+  customizedDrawerHeader: {
+    marginTop: '34px',
+    minHeight: '48px',
+    justifyContent: 'space-between',
+    color: 'rgb(180,180,180)'
+  },
+  customizedFlex: {
+    background: 'purple',
+    flex: '1 0 90%;'
+  },
+  lightColor: {
+    color: 'rgb(220,220,200)'
+  },
+  customizedDivider: {
+    background: 'rgb(80,80,80)'
+  },
+  sepStyle: {
+    background: 'rgb(80,80,80)',
+    height: '1px',
+    margin: '0px 0px',
+    padding: '0px'
+  },
+  customizedMain: {
+    marginTop: '90px',
+    height: '100 vh',
+  },
+  customizedToolbar: {
+    justifyContent: 'space-between'
+  }
 };
 
+
+/* This file encodes the major structure of the app. 
+   The two main components are the toolbar and the drawer
+*/
 
 export default function PersistentDrawerLeft() {
   const theme = useTheme();
@@ -128,20 +130,20 @@ export default function PersistentDrawerLeft() {
     setOpen(false);
   };
 
-  function selectedPlotsChanged(buttonPlots){
-    setSelectedPlots(buttonPlots); 
+  function selectedPlotsChanged(buttonPlots) {
+    setSelectedPlots(buttonPlots);
 
     var n = buttonPlots.length;
-    if(n == 1){
+    if (n == 1) {
       SerialDataObject.chartHeightRatio = 0.95;
       SerialDataObject.chartMarginRatio = 0.0;
     }
-    else if(n == 2){
-      SerialDataObject.chartHeightRatio = 0.925/n;
+    else if (n == 2) {
+      SerialDataObject.chartHeightRatio = 0.925 / n;
       SerialDataObject.chartMarginRatio = 0.02;
     }
-    else{
-      SerialDataObject.chartHeightRatio = 0.9/n;
+    else {
+      SerialDataObject.chartHeightRatio = 0.9 / n;
       SerialDataObject.chartMarginRatio = 0.02;
     }
   }
@@ -149,41 +151,43 @@ export default function PersistentDrawerLeft() {
   var serialChart = null;
   var spectrum = null;
   var monitor = null;
-  if(selectedPlots.includes('Plot')) 
+  if (selectedPlots.includes('Plot'))
     serialChart = <SerialChart />;
-  if(selectedPlots.includes('Spectrum')) 
-    spectrum = <Spectrum/>;
-  if(selectedPlots.includes('Monitor'))
+  if (selectedPlots.includes('Spectrum'))
+    spectrum = <Spectrum />;
+  if (selectedPlots.includes('Monitor'))
     monitor = <Monitor />;
 
   return (
-    <Box sx={{ display: 'flex', height:'100vh' }}>
-        
+    <Box sx={{ display: 'flex', height: '100vh' }}>
       <CssBaseline />
-      <AppBar open={open}  style={styles.customizedAppBar} >
-        <Toolbar variant="dense"  style={styles.customizedToolbar} >
+
+      {/* ------------- TOOLBAR ------------- */}
+      <AppBar open={open} style={styles.customizedAppBar} >
+        <Toolbar variant="dense" style={styles.customizedToolbar} >
           {/* HAMBURGER */}
-          <div style={{minWidth:"48px"}}>
-              <IconButton
-                color="inherit"
-                aria-label="open drawer"
-                onClick={handleDrawerOpen}
-                edge="start"
-                sx={{ mr: 2, ...(open && { display: 'none' }) }}
-              >
-            <MenuIcon />
-          </IconButton>
+          <div style={{ minWidth: "48px" }}>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleDrawerOpen}
+              edge="start"
+              sx={{ mr: 2, ...(open && { display: 'none' }) }}
+            >
+              <MenuIcon />
+            </IconButton>
           </div>
 
           {/* CHART SELECT */}
-          <ToggleButtonNotEmpty onChange={selectedPlotsChanged}/>
+          <ToggleButtonNotEmpty onChange={selectedPlotsChanged} />
 
           {/* PAUSE/STOP/PLAY */}
-          <SerialPause/>
+          <SerialPause />
         </Toolbar>
       </AppBar>
-    
-      <Drawer 
+
+      {/* ------------- DRAWER ------------- */}
+      <Drawer
         sx={{
           width: drawerWidth,
           flexShrink: 0,
@@ -199,35 +203,27 @@ export default function PersistentDrawerLeft() {
         open={open}
       >
         <DrawerHeader style={styles.customizedDrawerHeader} >
-          <div style={{color:'white', fontSize:titleFs, userSelect: 'none'}}> &nbsp; Settings </div>
-          <IconButton onClick={handleDrawerClose} style={{color:'white'}}>
+          <div style={{ color: 'white', fontSize: titleFs, userSelect: 'none' }}> &nbsp; Settings </div>
+          <IconButton onClick={handleDrawerClose} style={{ color: 'white' }}>
             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
-          
-
         </DrawerHeader>
-        
         <Divider style={styles.customizedDivider} />
-        <SettingsAccordion/>
+        <SettingsAccordion />
       </Drawer>
       <Main open={open} style={styles.customizedMain} >
-        <ToastContainer 
-            autoClose={1500}
-            position="bottom-center"
-            className="toast-container" 
-            closeOnClick={true}
-            toastStyle={{ backgroundColor: "rgb(20,20,20)", fontSize:'0.9rem', color: "rgb(200,200,200)" }}
+        {/*Conditionally render the views*/}
+        {serialChart}
+        {spectrum}
+        {monitor}
+        <ToastContainer
+          autoClose={1500}
+          position="bottom-center"
+          className="toast-container"
+          closeOnClick={true}
+          toastStyle={{ backgroundColor: "rgb(20,20,20)", fontSize: '0.9rem', color: "rgb(200,200,200)" }}
         />
-
-           {/*Conditionally render the views*/}
-           {serialChart}
-           {spectrum}
-           {monitor}
-
-        
-           
       </Main>
-    
     </Box>
   );
 }

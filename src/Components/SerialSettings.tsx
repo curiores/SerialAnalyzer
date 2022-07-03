@@ -4,7 +4,6 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import { Typography } from '@mui/material';
 import { GlobalSettings } from "../Utils/GlobalSettings.js";
-import SliderInput from "./SliderInput.tsx";
 import DoubleSliderInput from "./DoubleSliderInput.tsx";
 
 const menuFs = GlobalSettings.style.menuFs;
@@ -12,19 +11,25 @@ const menuFs = GlobalSettings.style.menuFs;
 const formStyle = {
     display: 'flex',
     flexDirection: 'row',
-  };
-  
-export default function SerialSettings(){
+};
+
+/* Creates the settings pane for the serial port.
+   TODO: Would probably be easier to use three separate states 
+   instead of the combined state.
+
+   TODO: Could also probably tweak this so it doesn't use "useEffect". 
+   Needs a bit of testing though.
+*/
+
+export default function SerialSettings() {
 
     const [values, setValues] = React.useState({
-        scroll:true,
-        autoScale:true,
-        estimTime:false,
+        scroll: true,
+        autoScale: true,
+        estimTime: false,
     })
-
+    const { scroll, autoScale, estimTime } = values;
     const yRef = React.useRef();
-
-    const{ scroll, autoScale, estimTime } = values;
 
     const formChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setValues({
@@ -32,7 +37,7 @@ export default function SerialSettings(){
             [event.target.name]: event.target.checked,
         });
     };
-    
+
     const formChangeAuto = (event: React.ChangeEvent<HTMLInputElement>) => {
         setValues({
             ...values,
@@ -41,54 +46,52 @@ export default function SerialSettings(){
         yRef.current.setValuesGlobal();
     };
 
-
-    React.useEffect(()=>{
+    React.useEffect(() => {
         GlobalSettings.timeSeries.scroll = values.scroll;
         GlobalSettings.timeSeries.autoScale = values.autoScale;
         GlobalSettings.timeSeries.estimateTime = values.estimTime;
-    }) 
+    })
 
-    return(
+    return (
         <div>
-             <FormGroup style={formStyle}>
-                <FormControlLabel 
-                    control={<Checkbox 
-                                checked={autoScale} 
-                                onChange={formChangeAuto} 
-                                name="autoScale" 
-                                size="small"/>} 
-                    label={<Typography sx={{ fontSize:menuFs,userSelect:"none"}}>Auto scale</Typography>} />
-            </FormGroup> 
+            <FormGroup style={formStyle}>
+                <FormControlLabel
+                    control={<Checkbox
+                        checked={autoScale}
+                        onChange={formChangeAuto}
+                        name="autoScale"
+                        size="small" />}
+                    label={<Typography sx={{ fontSize: menuFs, userSelect: "none" }}>Auto scale</Typography>} />
+            </FormGroup>
             <DoubleSliderInput
-                ref = {yRef}
+                ref={yRef}
                 disabled={autoScale}
                 step={0.1}
                 minValue={-20}
                 maxValue={20}
                 menuFs={menuFs}
                 settingHeader={"timeSeries"}
-                setting={["ymin","ymax"]}
-                name={["ymin","ymax"]}    
+                setting={["ymin", "ymax"]}
+                name={["ymin", "ymax"]}
                 spacing={3.8}
                 logscale={false}
                 inputWidth="3em"
             />
             <FormGroup style={formStyle}>
-                <FormControlLabel 
-                    control={<Checkbox 
-                                checked={scroll} 
-                                onChange={formChange} 
-                                name="scroll"  
-                                size="small"/>} 
-                    label={<Typography sx={{ fontSize:menuFs,userSelect:"none"}}>Scroll</Typography>} />
-                <FormControlLabel 
-                    control={<Checkbox checked={estimTime} 
-                                onChange={formChange} 
-                                name="estimTime" 
-                                size="small"/>} 
-                    label={<Typography sx={{ fontSize:menuFs,userSelect:"none"}}>Estimate time axis</Typography>} />
-            </FormGroup> 
+                <FormControlLabel
+                    control={<Checkbox
+                        checked={scroll}
+                        onChange={formChange}
+                        name="scroll"
+                        size="small" />}
+                    label={<Typography sx={{ fontSize: menuFs, userSelect: "none" }}>Scroll</Typography>} />
+                <FormControlLabel
+                    control={<Checkbox checked={estimTime}
+                        onChange={formChange}
+                        name="estimTime"
+                        size="small" />}
+                    label={<Typography sx={{ fontSize: menuFs, userSelect: "none" }}>Estimate time axis</Typography>} />
+            </FormGroup>
         </div>
     )
-
 }

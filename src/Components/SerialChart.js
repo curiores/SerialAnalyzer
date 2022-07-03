@@ -1,43 +1,26 @@
 import React from 'react';
 import { Line } from 'react-chartjs-2';
-import { SerialDataObject } from '../Utils/SerialData';
 
+import { SerialDataObject } from '../Utils/SerialData';
 import { colorList } from '../Resources/colorList.js';
 import { reformatData, autoResize } from '../Utils/DataUtils.js';
+import { GlobalSettings } from '../Utils/GlobalSettings.js';
 
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
+  Chart as ChartJS, CategoryScale, LinearScale,
+  PointElement, LineElement, Title, Tooltip, Legend,
 } from 'chart.js';
 
-import { GlobalSettings } from '../Utils/GlobalSettings.js';
-import { Global } from '@emotion/react';
-import { Typography } from '@mui/material';
-import { flexbox } from '@mui/system';
-
 ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
+  CategoryScale, LinearScale, PointElement,
+  LineElement, Title, Tooltip, Legend
 );
-  
-var tlabel = "ss"
-var refreshRate = 50; // In ms
-var padChars = 10; // How many characters to pad with
 
-var gridColor = 'rgba(100,100,100,0.3)';
-var plotFontColor = 'rgb(180,180,180)';
-var axisColor = 'rgb(180,180,180)';
+const refreshRate = GlobalSettings.timeSeries.refreshRate; // In ms
+const padChars = GlobalSettings.style.plotPadChars; // How many characters to pad with
+const gridColor = GlobalSettings.style.gridColor;
+const plotFontColor = GlobalSettings.style.plotFontColor;
+const axisColor = GlobalSettings.style.axisColor;
 
 const divStyle = {
   width: '95%',
@@ -51,6 +34,8 @@ var data = {
   datasets: [],
 };
 
+// The default chart options are modified as 
+// dictated by the user settings
 var defaultChartOptions = {
   animation: false,
   responsive: true,
@@ -68,77 +53,76 @@ var defaultChartOptions = {
     },
   },
   elements: {
-    point:{
-        radius: 0
+    point: {
+      radius: 0
     }
   },
-  scales:{
-      x: {
-          type: 'linear',
-          min: 0,
-          max: 1,
-          grid: {
-            color: gridColor,
-            borderColor: axisColor
-          },
-          ticks:{
-            color: plotFontColor
-          },
-          title:{ 
-            display:false,
-          }
+  scales: {
+    x: {
+      type: 'linear',
+      min: 0,
+      max: 1,
+      grid: {
+        color: gridColor,
+        borderColor: axisColor
       },
-      y: {
-        type: 'linear',
-        min: -3,
-        max: 3,
-        grid: {
-          color: gridColor,
-          borderColor: axisColor
-        },
-        ticks:{
-          color: plotFontColor,
-          callback: (val) => ( val.toString().padStart( padChars - val.toString().length, " ") )
-        }
+      ticks: {
+        color: plotFontColor
+      },
+      title: {
+        display: false,
+      }
+    },
+    y: {
+      type: 'linear',
+      min: -3,
+      max: 3,
+      grid: {
+        color: gridColor,
+        borderColor: axisColor
+      },
+      ticks: {
+        color: plotFontColor,
+        callback: (val) => (val.toString().padStart(padChars - val.toString().length, " "))
+      }
     }
   }
 };
 
-export default class SerialChart extends React.Component{
-     
-  constructor(props){
+/* Creates and updates the serial plot.
+   Uses chartjs to create the chart.
+   The chart is updated using references every refreshRate milliseconds. 
+*/
+export default class SerialChart extends React.Component {
+
+  constructor(props) {
     super(props)
     // This chart reference is needed to update the charts
-    this.divRef = React.createRef(); 
-    this.chartRef = React.createRef(); 
+    this.divRef = React.createRef();
+    this.chartRef = React.createRef();
     this.labelRef = React.createRef();
   };
 
+  updateChart() {
+    // Only update the chart if the chart object exists
+    if (this.chartRef !== null) {
 
-  updateChart(){
-
-    if(this.chartRef !== null ){
-
-     
       // Get the reference to the chart object
       var chart = this.chartRef.current;
+      if (chart !== null) {
 
-      if(chart !== null )
-      {
-
-        if(SerialDataObject.data.length !== 0 && !SerialDataObject.pauseFlag ){
-          
+        if (SerialDataObject.data.length !== 0 && !SerialDataObject.pauseFlag) {
           // Get the size of the data
           var nel = SerialDataObject.data.length;
-          var nvars = SerialDataObject.data[nel-1].length;
+          var nvars = SerialDataObject.data[nel - 1].length;
 
           // Check if there are enough chart data objects
           var k = chart.data.datasets.length;
-          while(chart.data.datasets.length < nvars ){
+          while (chart.data.datasets.length < nvars) {
             // Add a new dataset if its too short
             chart.data.datasets.push(
               {
-                label: k+1,
+                label: k + 1,
                 color: plotFontColor,
                 data: [],
                 borderColor: colorList[k % colorList.length],
@@ -148,75 +132,70 @@ export default class SerialChart extends React.Component{
             )
             k = k + 1;
           }
-          while(chart.data.datasets.length > nvars ){
+          while (chart.data.datasets.length > nvars) {
             // If there are too many, remove the last one.
             chart.data.datasets.pop();
           }
 
           // Line width
-          for (var i = 0; i < chart.data.datasets.length; i++){
+          for (var i = 0; i < chart.data.datasets.length; i++) {
             chart.data.datasets[i].borderWidth = GlobalSettings.global.lineThickness;
             chart.data.datasets[i].pointRadius = GlobalSettings.global.pointRadius;
           }
 
           // Update with data from the serial port
-          var tnow = SerialDataObject.timeHistory[SerialDataObject.timeHistory.length-1];
-          var tvec = (SerialDataObject.timeHistory.map((x)=>{return 1.0e-3*(x-tnow)}));
+          var tnow = SerialDataObject.timeHistory[SerialDataObject.timeHistory.length - 1];
+          var tvec = (SerialDataObject.timeHistory.map((x) => { return 1.0e-3 * (x - tnow) }));
 
           var step = 1;
-          for(var k = 0; k < nvars; k++){
-            if(GlobalSettings.timeSeries.estimateTime){
+          for (var k = 0; k < nvars; k++) {
+            if (GlobalSettings.timeSeries.estimateTime) {
 
-              chart.data.datasets[k].data = reformatData(tvec,SerialDataObject.data,k,step);   
+              chart.data.datasets[k].data = reformatData(tvec, SerialDataObject.data, k, step);
             }
-            else{
-              chart.data.datasets[k].data = reformatData(SerialDataObject.dataIdx,SerialDataObject.data,k,step);   
+            else {
+              chart.data.datasets[k].data = reformatData(SerialDataObject.dataIdx, SerialDataObject.data, k, step);
             }
-           
-            
           }
         }
 
         // If the settings include automatic resizing, perform that here
         autoResize();
 
-
         // Update options
         var newOps = defaultChartOptions;
 
-        if(GlobalSettings.timeSeries.estimateTime){
+        if (GlobalSettings.timeSeries.estimateTime) {
           var nt = SerialDataObject.timeHistory.length;
-          var tnow = SerialDataObject.timeHistory[nt-1];
+          var tnow = SerialDataObject.timeHistory[nt - 1];
           var t0 = SerialDataObject.timeHistory[0];
-          newOps.scales.x.min = 1.0e-3*(t0-tnow)*SerialDataObject.bufferSize/nt;
+          newOps.scales.x.min = 1.0e-3 * (t0 - tnow) * SerialDataObject.bufferSize / nt;
           newOps.scales.x.max = 0;
           this.labelRef.current.innerHTML = "t&nbsp;(s)"
           // newOps.scales.x.title = { text:"t (sec)", display:true, align:"end", padding:0};
         }
-        else{
+        else {
           newOps.scales.x.min = 0.0;
           newOps.scales.x.max = SerialDataObject.bufferSize;
           this.labelRef.current.innerHTML = "&nbsp;n"
         }
         newOps.scales.y.max = GlobalSettings.timeSeries.ymax;
         newOps.scales.y.min = GlobalSettings.timeSeries.ymin;
-        newOps.plugins.title.text=SerialDataObject.port.friendlyName;
+        newOps.plugins.title.text = SerialDataObject.port.friendlyName;
 
         chart.options = newOps;
 
-        
-        if( typeof chart.data.datasets[0] === 'undefined'){
+        if (typeof chart.data.datasets[0] === 'undefined') {
           this.labelRef.current.innerHTML = "";
         }
-  
+
         // Need to set the height by hand
         // (Flex doesn't work well for this)
         // To do so, update the size of the containing div
         // (ref: https://www.chartjs.org/docs/2.7.2/general/responsive.html#important-note)
         var parentHeight = this.divRef.current.parentElement.clientHeight;
-        this.divRef.current.style.height =  SerialDataObject.chartHeightRatio*parentHeight + 'px';
+        this.divRef.current.style.height = SerialDataObject.chartHeightRatio * parentHeight + 'px';
 
-        
         // Call the update
         chart.update();
       }
@@ -224,35 +203,36 @@ export default class SerialChart extends React.Component{
   }
 
   timer = null;
-  componentDidMount(){
+  componentDidMount() {
     // This will refresh the chart as often as indiciated
     // in the variable refreshRate
     this.timer = setInterval(() => {
       this.updateChart();
-    }, refreshRate); 
+    }, refreshRate);
   }
 
-  componentWillUnmount(){
+  componentWillUnmount() {
     clearInterval(this.timer);
   }
 
   // Render the chart component (this only updates when the chart is created)
-  render(){
-    return(
+  render() {
+    return (
       <div style={divStyle} ref={this.divRef}>
-          <Line data={data} options={defaultChartOptions} ref={this.chartRef}>
-          </Line>
-          <div style={{marginLeft:"-64px", verticalAlign: "bottom",
-              bottom:"0px",width:"0px",fontSize:"12px",marginBottom:"20px",
-              color:plotFontColor,
-              display: "inline-block",
-              alignSelf: "flex-end",
-              fontFamily:"'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"}}
-              ref={this.labelRef}
-              >
-              n
-          </div>
-
+        <Line data={data} options={defaultChartOptions} ref={this.chartRef}>
+        </Line>
+        <div style={{
+            marginLeft: "-64px", verticalAlign: "bottom",
+            bottom: "0px", width: "0px", fontSize: "12px", marginBottom: "20px",
+            color: plotFontColor,
+            display: "inline-block",
+            alignSelf: "flex-end",
+            fontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
+          }}
+          ref={this.labelRef}
+        >
+          n
+        </div>
       </div>
     )
   }

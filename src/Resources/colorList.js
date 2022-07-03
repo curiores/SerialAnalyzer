@@ -1,3 +1,6 @@
+
+// Only the first three colors were picked
+// TODO: add new colors for 3-....
 export var colorList = ["#03A9F4",
                         "#FF7043",
                         "#7E57C2",

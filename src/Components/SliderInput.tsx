@@ -1,28 +1,9 @@
 import * as React from 'react';
-import { styled } from '@mui/material/styles';
 import Grid from '@mui/material/Grid';
 import Slider from '@mui/material/Slider';
-import MuiInput from '@mui/material/Input';
+import Input from '@mui/material/Input';
 import Typography from '@mui/material/Typography';
 import { GlobalSettings } from "../Utils/GlobalSettings.js";
-
-/* EXAMPLE
-  <SliderInput
-      disabled={autoScale}
-      minValue={0}
-      maxValue={20}
-      menuFs={menuFs}
-      settingHeader={"timeSeries"}
-      setting={"ymax"}
-      name={"ymax"}                
-  />
-
-*/
-
-
-const Input = styled(MuiInput)`
-  width: 42px;
-`;
 
 const divStyle = {
     display: "flex",
@@ -31,7 +12,13 @@ const divStyle = {
     height: "50px",
 }
 
-export default function YMin(props) {
+/* Creates a slider and an input value
+   Would need to be modified to support external changes 
+   of the global settings. (For example, by converting
+    it to a class like the double slider input)
+*/
+
+export default function SliderInput(props) {
   
     // Get the properties
     const name = props.name;
@@ -50,8 +37,6 @@ export default function YMin(props) {
 
     function valueChanged(newValue){
         setValue(newValue)
-        // Also update the parent
-        // props.onChange(newValue)
         // Also update the global object
         GlobalSettings[settingHeader][setting] = newValue;
     }

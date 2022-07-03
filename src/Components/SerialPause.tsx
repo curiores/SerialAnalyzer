@@ -22,6 +22,15 @@ const IconButton = styled(MuiIconButton)({
       }
   });
 
+/* Implements the pause/play/stop functionality.
+   
+   TODO: This is one of the less carefully constructed methods.
+         Here are some potential improvements:
+         * refactor the states to a single variable that makes more sense.
+         * adjust the way this interacts with the serial select so that
+           it doesn't use a timer but interacts directly with it
+           (might need to convert this to a class and use references)
+*/
 
 export default function SerialPause() {
 
@@ -56,7 +65,6 @@ export default function SerialPause() {
         setRunning(true);
         setStopped(false);
         setPaused(false);
-
     }
 
     function stopCallback(){
@@ -88,9 +96,6 @@ export default function SerialPause() {
             clearInterval(timer);
         }
     }, [])
-
- 
-
 
     return (
       <Stack direction="row" alignItems="center" spacing={0}>
