@@ -1,11 +1,11 @@
 {
-  "name": "electron-cra-example",
-  "version": "0.1.0",
+  "name": "SerialAnalyzer",
+  "version": "1.0.0",
   "private": true,
   "main": "./public/electron.js",
   "homepage": "./",
-  "author": "John Doe",
-  "description": "My fantastic Electron app",
+  "author": "Curio Res <curiores@gmail.com>",
+  "description": "An app for analyzing serial data.",
   "dependencies": {
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11.9.3",
@@ -66,8 +66,8 @@
     "wait-on": "^6.0.1"
   },
   "build": {
-    "appId": "com.electron.myapp",
-    "productName": "My Electron App",
+    "appId": "com.electron.serialanalyzer",
+    "productName": "Serial Analyzer",
     "files": [
       "build/**/*",
       "node_modules/**/*"

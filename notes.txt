@@ -1,5 +1,0 @@
-1. Run dev:
-	yarn electron:start 
-2. Package:
-	yarn electron:package:<platform>
-	yarn electron:package:win
