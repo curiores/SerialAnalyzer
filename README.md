@@ -3,3 +3,10 @@
 
 An app for analyzing serial data.
 
+### Downloads
+<ul>
+<li>
+Windows installer: <a href="https://github.com/curiores/SerialAnalyzer/raw/main/Serial%20Analyzer%20Setup%201.0.0.exe">Serial Analyzer V1.0.0</a>
+</li>
+</ul>
+
