@@ -268,7 +268,9 @@ export default class Spectrum extends React.Component{
         // Update options
         var newOps = defaultChartOptions;
         if(xMax !== undefined && GlobalSettings.spectrum.autoScaleH){
+          newOps.scales.x.min = 0;
           newOps.scales.x.max = xMax;
+          GlobalSettings.spectrum.fmin = 0;
           GlobalSettings.spectrum.fmax = xMax;
         }
         else{

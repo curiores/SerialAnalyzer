@@ -27,7 +27,7 @@ export var GlobalSettings = {
         fmin: 0,
         fmax: 60,
         logScale: true,
-        autoScaleV: false,
+        autoScaleV: true,
         autoScaleH: true,
         NHistory: 20,
         windowFunc: "hann",

@@ -34,7 +34,7 @@ export function nextPowerOf2(x){
 
 export function autoResize(){
 
-    if(GlobalSettings.timeSeries.autoScale){
+    if(GlobalSettings.timeSeries.autoScale && !SerialDataObject.pauseFlag){
         // Min and max of y
         var ymin = Math.min(...SerialDataObject.data.flat());
         var ymax = Math.max(...SerialDataObject.data.flat());
@@ -72,7 +72,7 @@ export function autoResizeSpectrum(dataMin,dataMax){
     dataMin = Math.min(...minHistory);
     dataMax = Math.max(...maxHistory);
     
-    if(GlobalSettings.spectrum.autoScaleV){
+    if(GlobalSettings.spectrum.autoScaleV && !SerialDataObject.pauseFlag){
         var dataMinUpdate = 0;
         var dataMaxUpdate = 100;
         if(GlobalSettings.spectrum.logScale){
