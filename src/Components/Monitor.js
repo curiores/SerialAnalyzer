@@ -7,6 +7,7 @@ var refreshRate = GlobalSettings.monitor.refreshRate; // In ms
 
 const divStyle = {
   width: '86%',
+  maxWidth: '86vw',
   marginLeft: '7%',
   marginRight: '7%',
   height: '100px',
@@ -21,6 +22,7 @@ const divStyle = {
   display: 'flex',
   flexDirection: 'column-reverse',
   overflowY: 'auto',
+  whiteSpace: 'pre',
 };
 
 /* Defines the serial monitor as a styled div.
@@ -46,6 +48,12 @@ export default class Monitor extends React.Component {
       // this.divRef.current.innerText = this.divRef.current.innerText  + ".... \n";
       this.divRef.current.innerText = SerialDataObject.rawData.join('\n');
       this.divRef.current.style.fontSize = GlobalSettings.monitor.fontSize / 12.0 * 0.85 + "rem";
+      if(GlobalSettings.global.drawerOpen){
+        this.divRef.current.style.maxWidth = "calc(86vw - " + GlobalSettings.style.drawerWidth + "px)";
+      }
+      else{
+        this.divRef.current.style.maxWidth = "86vw";
+      }
     }
   }
 

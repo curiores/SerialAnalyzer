@@ -12,6 +12,7 @@ export var GlobalSettings = {
         lineThickness: 2,
         pointRadius: 0,
         firstColumnTime: false,
+        drawerOpen: true,
     },
     timeSeries: {
         ymin: -5,

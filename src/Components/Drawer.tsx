@@ -124,10 +124,12 @@ export default function PersistentDrawerLeft() {
 
   const handleDrawerOpen = () => {
     setOpen(true);
+    GlobalSettings.global.drawerOpen = true;
   };
 
   const handleDrawerClose = () => {
     setOpen(false);
+    GlobalSettings.global.drawerOpen = false;
   };
 
   function selectedPlotsChanged(buttonPlots) {
