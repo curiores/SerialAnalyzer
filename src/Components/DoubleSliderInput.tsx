@@ -90,7 +90,7 @@ export default class DoubleSliderInput extends React.Component {
     return (
       <Box >
         <Grid container spacing={1} alignItems="center" >
-          <Grid item style={{ height: "14px" }} xs={14} rowSpacing={0}  >
+          <Grid item style={{ height: "14px", marginLeft:"10px",marginRight:"10px"  }} xs={14} rowSpacing={0}  >
             <Slider
               disabled={this.props.disabled}
               getAriaLabel={() => 'Minimum distance shift'}

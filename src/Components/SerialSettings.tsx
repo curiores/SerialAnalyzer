@@ -53,7 +53,7 @@ export default function SerialSettings() {
     })
 
     return (
-        <div>
+        <div >
             <FormGroup style={formStyle}>
                 <FormControlLabel
                     control={<Checkbox
