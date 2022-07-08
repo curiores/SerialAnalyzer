@@ -10,3 +10,6 @@ Windows installer: <a href="https://github.com/curiores/SerialAnalyzer/raw/main/
 </li>
 </ul>
 
+### Tutorial Video
+&nbsp;&nbsp;&nbsp; <a href="https://youtu.be/6LcyG-hUZ2I"> <img src="https://user-images.githubusercontent.com/69270611/177990726-dfcf318a-4f1b-403b-aace-210cf5e41efa.png" width="200px"> </a>
+
