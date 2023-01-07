@@ -1,1 +1,2 @@
 Serial[[:space:]]Analyzer[[:space:]]Setup[[:space:]]1.0.0.exe filter=lfs diff=lfs merge=lfs -text
+serialanalyzer_1.0.1_amd64.deb filter=lfs diff=lfs merge=lfs -text

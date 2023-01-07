@@ -1,6 +1,6 @@
 {
-  "name": "SerialAnalyzer",
-  "version": "1.0.0",
+  "name": "serialanalyzer",
+  "version": "1.0.1",
   "private": true,
   "main": "./public/electron.js",
   "homepage": "./",
