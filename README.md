@@ -6,7 +6,7 @@ An app for analyzing serial data.
 ### Downloads
 <ul>
 <li>
-Windows installer: <a href="https://github.com/curiores/SerialAnalyzer/raw/main/Serial%20Analyzer%20Setup%201.0.0.exe">Serial Analyzer V1.0.0</a>
+Windows installer: <a href="https://github.com/curiores/SerialAnalyzer/raw/main/Serial%20Analyzer%20Setup%201.0.1.exe">Serial Analyzer V1.0.1</a>
 </li>
 <li>
 Linux (.deb): <a href="https://github.com/curiores/SerialAnalyzer/raw/main/serialanalyzer_1.0.1_amd64.deb">Serial Analyzer V1.0.1</a>
