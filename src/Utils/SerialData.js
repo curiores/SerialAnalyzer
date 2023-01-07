@@ -37,7 +37,8 @@ export var SerialDataObject = {
     NsampleRateUpdate: 10 // Update the sample rate after this many samples
 }
 
-export function StartSerial() {
+export function StartSerial(port) {
+
     // Clear the data when the serial first starts
     SerialDataObject.rawData = [];
     SerialDataObject.data = [];
@@ -52,23 +53,80 @@ export function StartSerial() {
         // Close the serial port
         SerialDataObject.serialObj.close((err) => {
             console.log("Stop serial port? Error:" + err)
-            serialSetup();
+            serialSetup(port);
         });
     } else {
-        serialSetup();
+        serialSetup(port);
     }
 }
 
+export const GetPortName = (port) => {
+    // On linux the friendly name does not exist, so we need to make a name
+    if(typeof(port.friendlyName) === "undefined" || port.friendlyName ===""){
+        let portName = "";
+        if(typeof(port.path) !== "undefined"){
+        portName += port.path;
+        }
+        if(typeof( port.pnpId) !== "undefined"){
+        portName += " | " + port.pnpId;
+        }
+        return portName;
+    }
+    else{
+        // If the friendly name exists, use it
+        return port.friendlyName;
+    }
+}
+
+
+export const GetPortShortName = (port) => {
+    if(typeof(port) == "undefined"){
+        return "";
+    }
+    // On linux the friendly name does not exist, so we need to make a name
+    if(typeof(port.friendlyName) === "undefined" || port.friendlyName ===""){
+        let portName = "";
+        if(typeof(port.path) !== "undefined"){
+        portName += port.path;
+        }
+        return portName;
+    }
+    else{
+        // If the friendly name exists, use it
+        return port.friendlyName;
+    }
+}
+
+
+      
 var decIndex = 1; // Determines which data points to keep
-function serialSetup() {
+function serialSetup(port) {
     // Notify the user that the serial port is being started
-    toast("Starting Serial on " + SerialDataObject.port.friendlyName 
+    let toastId = toast("Starting Serial on " + GetPortShortName(port)
             + " with baud rate: " + SerialDataObject.baudRate);
+
+
+    // Set the global port object 
+    SerialDataObject.port = port;
+      
     // Starts the serial port
     SerialDataObject.serialObj = new SerialPort({
-        path: SerialDataObject.port.path,
-        baudRate: SerialDataObject.baudRate
-    });
+        path: port.path,
+        baudRate: SerialDataObject.baudRate,
+        autoOpen:true,
+    },(err)=>{
+        if(err){
+            toast.dismiss(toastId);
+            toast.error("Error starting serial port on " + GetPortShortName(port) + "\n\n" + err);    
+            console.log(err);
+        }
+        else{
+            console.log("Successful connection");
+        }
+    }
+    );
+
+
     // Parser    
     const parser = SerialDataObject.serialObj.pipe(new ReadlineParser({ delimiter: '\r\n' }))
     // Run the parser to collect data

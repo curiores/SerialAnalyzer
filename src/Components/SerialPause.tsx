@@ -54,7 +54,7 @@ export default function SerialPause() {
             }
             else{
                 // Otherwise, restart the serial port
-                StartSerial();    
+                StartSerial(SerialDataObject.port);    
             }
         }
         else{
@@ -70,10 +70,13 @@ export default function SerialPause() {
     function stopCallback(){
         if(SerialDataObject.serialObj !== null){
             // Close the serial port
+            console.log(SerialDataObject.serialObj)
             SerialDataObject.serialObj.close((err) => {
                 console.log("Stop?" + err)
             });
         }
+        console.log(SerialDataObject.port)
+
         setStopped(true);
         setPaused(false);
         setRunning(false);

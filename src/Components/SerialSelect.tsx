@@ -10,7 +10,7 @@ import Dialog from '@mui/material/Dialog';
 import CableIcon from '@mui/icons-material/Cable';
 import Typography from '@mui/material/Typography';
 import { indigo } from '@mui/material/colors';
-import { SerialDataObject, StartSerial } from '../Utils/SerialData';
+import { SerialDataObject, StartSerial, GetPortName, GetPortShortName } from '../Utils/SerialData';
 import { GlobalSettings } from "../Utils/GlobalSettings.js";
 
 const { SerialPort } = window.require("serialport");
@@ -51,7 +51,7 @@ function SimpleDialog(props: SerialDialogProps) {
                 <CableIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={port.friendlyName} />
+            <ListItemText primary={GetPortName(port)} />
           </ListItem>
         ))}
       </List>
@@ -91,19 +91,16 @@ export function SerialPortsList() {
         if (SerialDataObject.serialObj.isOpen) {
           // Close the serial port
           SerialDataObject.serialObj.close((err) => {
-            SerialDataObject.port = port; // Set the global port
-            StartSerial(); // Start up the serial port     
+            StartSerial(port); // Start up the serial port     
             setSerialOn(true);
           });
         }
         else {
-          SerialDataObject.port = port; // Set the global port
-          StartSerial(); // Start up the serial port     
+          StartSerial(port); // Start up the serial port     
         }
       }
       else {
-        SerialDataObject.port = port; // Set the global port
-        StartSerial(); // Start up the serial port    
+        StartSerial(port); // Start up the serial port    
       }
     }
     // Always close the window
@@ -114,7 +111,7 @@ export function SerialPortsList() {
     <div style={selectStyles}>
       <SetSerialButton handleClickOpen={handleClickOpen} />
       <Typography variant="subtitle1" component="div" style={{ fontSize: titleFs }}>
-        Current: {SerialDataObject.port.friendlyName}
+        Current: {GetPortShortName(SerialDataObject.port)}
       </Typography>
       <SimpleDialog
         open={open}
@@ -149,3 +146,4 @@ function showSerialPorts() {
     return ports;
   })
 }
+
