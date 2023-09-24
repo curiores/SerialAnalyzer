@@ -1,7 +1,8 @@
 // Module to control the application lifecycle and the native browser window.
-const { app, BrowserWindow, protocol } = require("electron");
+const { app, BrowserWindow, protocol, ipcMain, dialog } = require("electron");
 const path = require("path");
 const url = require("url");
+const fse = require("fs-extra");
 
 app.allowRendererProcessReuse = false
 
@@ -20,6 +21,7 @@ function createWindow() {
     },
     webPreferences: {
       nodeIntegration: true,
+      enableRemoteModule: true,
       contextIsolation: false, 
       preload: path.join(__dirname, "preload.js"),
     },
@@ -41,6 +43,7 @@ function createWindow() {
   if (!app.isPackaged) {
     mainWindow.webContents.openDevTools({ mode: "detach" });
   }
+
 }
 
 // Setup a local proxy to adjust the paths of requested files when loading
@@ -65,6 +68,16 @@ app.whenReady().then(() => {
   createWindow();
   setupLocalFilesNormalizerProxy();
 
+  ipcMain.handle('dialog', async (event, method, params) => {       
+    const directory = await dialog[method](params);
+    return directory
+  });
+
+  ipcMain.handle('fse', async(event,method,...args) => {       
+    const res = await fse[method](...args);
+    return res;
+  });
+
   app.on("activate", function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
@@ -72,6 +85,7 @@ app.whenReady().then(() => {
       createWindow();
     }
   });
+  
 });
 
 // Quit when all windows are closed, except on macOS.

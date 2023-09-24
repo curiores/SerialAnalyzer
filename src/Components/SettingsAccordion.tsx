@@ -12,6 +12,7 @@ import SerialSettings from "./SerialSettings.tsx";
 import SpectrumSettings from "./SpectrumSettings.tsx";
 import MonitorSettings from './MonitorSettings.tsx';
 import { GlobalSettings } from "../Utils/GlobalSettings.js";
+import RecordSettings from './RecordSettings.tsx';
 
 const titleFs = GlobalSettings.style.titleFs;
 const summaryHeight = '40px';
@@ -104,6 +105,15 @@ export default function SettingsAccordion() {
         <AccordionDetails>
           {/* MONITOR SETTINGS PANE */}
           <MonitorSettings/>
+        </AccordionDetails>
+      </Accordion>
+      <Accordion expanded={expanded === 'panel4'} onChange={handleChange('panel4')}>
+        <AccordionSummary aria-controls="panel4d-content" id="panel4d-header" sx={{ height: summaryHeight, minHeight:summaryHeight}} >
+          <Typography style={{fontSize:titleFs}}>Recording</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          {/* RECORDING SETTINGS PANE */}
+          <RecordSettings/>
         </AccordionDetails>
       </Accordion>
       </div>

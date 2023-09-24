@@ -25,5 +25,15 @@ Build the app:
 <br> &nbsp; &nbsp; <code>yarn electron:package:linux</code>
 <br> &nbsp; &nbsp; <code>yarn electron:package:mac</code>
 
+### Updates:
+<b>V1.1.0</b>
+* Added a record option
+    * Only records the raw Arduino data to a text file
+    * Usage:
+        * Press record (●) and select the folder where you want to store your data
+        * Press record again to stop recording
+        * Change the folder where data should be stored using the settings drawer
+    * Each time recording is stopped and restarted, a new recording file is created in the requested directory
 
-
+### Notes:
+On Windows, you must run the build as administrator, or you may receive an error during install of electorn (node install.js). This is due to an Error: EPERM: operation not permitted error for an electron cached file in the user's app data.

@@ -1,5 +1,6 @@
 import { GlobalSettings } from "./GlobalSettings.js";
 import { ToastContainer, toast } from 'react-toastify';
+import { writeDataIfRecording } from "./DataRecording.js";
 
 const { SerialPort } = window.require("serialport");
 const { ReadlineParser } = window.require('@serialport/parser-readline')
@@ -159,6 +160,9 @@ function serialSetup(port) {
             SerialDataObject.rawData.shift();
         }
 
+        // If we're recording, write each data row to the file
+        writeDataIfRecording(data);
+        
         // Now parse the numeric data
         var splitData = data.split(/\s+|,\s+/);
         var nums = splitData.map(parseFloat);
@@ -209,3 +213,4 @@ function idxData(n) {
     }
     return (idxVec);
 }
+

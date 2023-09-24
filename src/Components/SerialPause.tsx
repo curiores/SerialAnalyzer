@@ -1,10 +1,15 @@
 import * as React from 'react';
-import Stack from '@mui/material/Stack';
+import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
 import MuiIconButton from '@mui/material/IconButton';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import PauseCircleIcon from '@mui/icons-material/PauseCircle';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { styled } from "@mui/material/styles";
+import { GlobalSettings } from "../Utils/GlobalSettings.js";
+import { selectOutputDirectory, setNextOutputFilename } from '../Utils/DataRecording.js'
+import { toast } from 'react-toastify';
 
 import { SerialDataObject, StartSerial } from '../Utils/SerialData';
 
@@ -20,7 +25,21 @@ const IconButton = styled(MuiIconButton)({
     "&:disabled": {
         opacity: '0.2 !important'
       }
-  });
+});
+
+const StyledDivider = styled(Divider)({
+    background:GlobalSettings.style.playPauseTrayOutlineColor
+})
+
+
+const boxSx = {
+    display: 'flex',
+    alignItems: 'center',
+    width: 'fit-content',
+    '& hr': {
+        mx: 0.5,
+    },
+};
 
 /* Implements the pause/play/stop functionality.
    
@@ -37,6 +56,7 @@ export default function SerialPause() {
     const [paused,setPaused] = React.useState(true); 
     const [stopped,setStopped] = React.useState(true); 
     const [running,setRunning] = React.useState(true); 
+    const [record,setRecord] = React.useState(GlobalSettings.record.recording);
 
     function pauseCallback(){
         SerialDataObject.pauseFlag = true; // Global flag for the charts/monitor
@@ -82,6 +102,28 @@ export default function SerialPause() {
         setRunning(false);
     }
 
+    const recordCallback = React.useCallback(async () =>{
+        let updatedRecordSetting = !record;
+        if(updatedRecordSetting){
+            if(GlobalSettings.record.directory === null){
+                await selectOutputDirectory();
+            }
+
+            if(GlobalSettings.record.directory !== null){
+                setRecord(updatedRecordSetting);
+                GlobalSettings.record.recording = updatedRecordSetting;
+                await setNextOutputFilename();
+            }
+            else{
+                toast.error("No output folder selected. Recording not enabled.");    
+            }
+        }
+        else{
+            setRecord(updatedRecordSetting);
+            GlobalSettings.record.recording = updatedRecordSetting;
+        }
+    },[record]);
+
     // Hacky workaround to get the intial state to sync when the serial port is selected
     var timer = null;
     React.useEffect(() => {
@@ -101,18 +143,25 @@ export default function SerialPause() {
     }, [])
 
     return (
-      <Stack direction="row" alignItems="center" spacing={0}>
+        <Box sx={boxSx}>
+            <IconButton  disabled={paused || stopped}  aria-label="delete" size="medium" onClick={pauseCallback} >
+                <PauseCircleIcon fontSize="medium" />
+            </IconButton>
+            <IconButton  disabled={running} aria-label="delete" size="medium" onClick={playCallback}>
+                <PlayCircleIcon fontSize="inherit" />
+            </IconButton>
+            <IconButton disabled={stopped} aria-label="delete" size="medium" onClick={stopCallback}>
+                <StopCircleIcon fontSize="inherit" />
+            </IconButton>
 
-        <IconButton  disabled={paused || stopped}  aria-label="delete" size="medium" onClick={pauseCallback}>
-          <PauseCircleIcon fontSize="medium" />
-        </IconButton>
-        <IconButton  disabled={running} aria-label="delete" size="medium" onClick={playCallback}>
-          <PlayCircleIcon fontSize="inherit" />
-        </IconButton>
-        <IconButton disabled={stopped} aria-label="delete" size="medium" onClick={stopCallback}>
-          <StopCircleIcon fontSize="inherit" />
-        </IconButton>
+            <StyledDivider orientation="vertical" flexItem />
 
-      </Stack>
+            <IconButton aria-label="delete" size="medium" onClick={recordCallback}>
+                { record 
+                    ? <FiberManualRecordIcon fontSize="inherit" style={{ color: 'rgba(230,0,0,1)' }}/>
+                    : <FiberManualRecordIcon fontSize="inherit" />
+                }
+            </IconButton>
+        </Box>
     );
   }

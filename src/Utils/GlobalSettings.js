@@ -40,6 +40,11 @@ export var GlobalSettings = {
         fontSize: 12,
         refreshRate: 50,
     },
+    record: {
+        recording: false,
+        directory: null,
+        outputFilename: null
+    },
     style: {
         menuFs: "0.8rem",
         titleFs: "0.9rem",
@@ -49,5 +54,6 @@ export var GlobalSettings = {
         plotFontColor: 'rgb(180,180,180)',
         axisColor: 'rgb(180,180,180)',
         plotPadChars: 10,
+        playPauseTrayOutlineColor:'rgb(255,255,255,0.4)'
     }
 };
