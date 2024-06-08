@@ -11,6 +11,11 @@ Visit the dedicated page on curiores.com to download the current and previous ve
 &nbsp;&nbsp;&nbsp; <a href="https://youtu.be/6LcyG-hUZ2I"> <img src="https://user-images.githubusercontent.com/69270611/177990726-dfcf318a-4f1b-403b-aace-210cf5e41efa.png" width="200px"> </a>
 
 ### Working with the source
+Setup:
+- Install node so you have npm available (you can start by installing nvm which manages node versions)
+- Install yarn
+- In the source directory use <code>yarn install</code> to download the required dependencies
+
 Start the app:
 <br> &nbsp; &nbsp; <code>yarn electron:start</code>
 
