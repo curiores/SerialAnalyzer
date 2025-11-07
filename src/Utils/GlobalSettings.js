@@ -39,6 +39,7 @@ export var GlobalSettings = {
     monitor: {
         fontSize: 12,
         refreshRate: 50,
+        showTimestamp: false,
     },
     record: {
         recording: false,

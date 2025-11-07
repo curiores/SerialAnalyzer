@@ -29,6 +29,7 @@ export var SerialDataObject = {
     pauseFlag: false, // when this is true, the data continues to stream, but plots do not update
     data: [],
     rawData: [],
+    rawDataTime: [],
     dataIdx: [],
     serialObj: null,
     // UDP support
@@ -53,6 +54,7 @@ export function StartSerial(port) {
 
     // Clear the data when the serial first starts
     SerialDataObject.rawData = [];
+    SerialDataObject.rawDataTime = [];
     SerialDataObject.data = [];
     SerialDataObject.dataIndex = [];
     SerialDataObject.pauseFlag = false;
@@ -164,11 +166,13 @@ function serialSetup(port) {
             }
         }
 
-        // Push the raw data (unless its NaN)
+        // Push the raw data and a wall-clock timestamp
         SerialDataObject.rawData.push(data);
+        SerialDataObject.rawDataTime.push(Date.now());
         if (SerialDataObject.rawData.length >= SerialDataObject.bufferSize) {
             // If the buffer is full, remove the first line of the raw data
             SerialDataObject.rawData.shift();
+            SerialDataObject.rawDataTime.shift();
         }
 
         // If we're recording, write each data row to the file
@@ -231,6 +235,7 @@ export function StartUDP(portNumber) {
 
     // Clear data buffers and flags
     SerialDataObject.rawData = [];
+    SerialDataObject.rawDataTime = [];
     SerialDataObject.data = [];
     SerialDataObject.dataIndex = [];
     SerialDataObject.pauseFlag = false;
@@ -317,8 +322,10 @@ export function StartUDP(portNumber) {
         }
 
         SerialDataObject.rawData.push(data);
+        SerialDataObject.rawDataTime.push(Date.now());
         if (SerialDataObject.rawData.length >= SerialDataObject.bufferSize) {
             SerialDataObject.rawData.shift();
+            SerialDataObject.rawDataTime.shift();
         }
 
         writeDataIfRecording(data);

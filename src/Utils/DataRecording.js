@@ -44,6 +44,16 @@ export function writeDataIfRecording(data){
         if(GlobalSettings.record.recording && GlobalSettings.record.directory !== null){
             let filename = path.join(GlobalSettings.record.directory,GlobalSettings.record.outputFilename);
             let dataWithNewline = data + "\r\n";
+            if (GlobalSettings.monitor && GlobalSettings.monitor.showTimestamp) {
+                const d = new Date();
+                const pad = (n, w=2) => String(n).padStart(w,'0');
+                const h = pad(d.getHours());
+                const m = pad(d.getMinutes());
+                const s = pad(d.getSeconds());
+                const ms = pad(d.getMilliseconds(),3);
+                const ts = `[${h}:${m}:${s}.${ms}]`;
+                dataWithNewline = `${ts} ${data}\r\n`;
+            }
             ipcRenderer.invoke('fse','appendFile',filename,dataWithNewline);
         }
     }

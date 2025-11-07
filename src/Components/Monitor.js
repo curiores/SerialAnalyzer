@@ -46,7 +46,29 @@ export default class Monitor extends React.Component {
       this.divRef.current.style.marginTop = 0.04 * parentHeight + 'px';
       this.divRef.current.style.height = 0.9 * SerialDataObject.chartHeightRatio * parentHeight + 'px';
       // this.divRef.current.innerText = this.divRef.current.innerText  + ".... \n";
-      this.divRef.current.innerText = SerialDataObject.rawData.join('\n');
+      const withTs = GlobalSettings.monitor.showTimestamp;
+      const formatTs = (ts) => {
+        const d = new Date(ts);
+        const pad = (n, w=2) => String(n).padStart(w,'0');
+        const h = pad(d.getHours());
+        const m = pad(d.getMinutes());
+        const s = pad(d.getSeconds());
+        const ms = pad(d.getMilliseconds(),3);
+        return `[${h}:${m}:${s}.${ms}]`;
+      };
+      let text = '';
+      if (withTs && Array.isArray(SerialDataObject.rawDataTime)) {
+        const n = SerialDataObject.rawData.length;
+        const lines = new Array(n);
+        for (let i = 0; i < n; i++) {
+          const ts = SerialDataObject.rawDataTime[i];
+          lines[i] = (ts !== undefined ? `${formatTs(ts)} ` : '') + SerialDataObject.rawData[i];
+        }
+        text = lines.join('\n');
+      } else {
+        text = SerialDataObject.rawData.join('\n');
+      }
+      this.divRef.current.innerText = text;
       this.divRef.current.style.fontSize = GlobalSettings.monitor.fontSize / 12.0 * 0.85 + "rem";
       if(GlobalSettings.global.drawerOpen){
         this.divRef.current.style.maxWidth = "calc(86vw - " + GlobalSettings.style.drawerWidth + "px)";
