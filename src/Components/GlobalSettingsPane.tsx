@@ -3,14 +3,17 @@ import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import { Typography } from '@mui/material';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { GlobalSettings } from "../Utils/GlobalSettings.js";
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 
 import BufferSizeSlider from './BufferSize.tsx';
 import SliderInput from "./SliderInput.tsx";
-import { SerialDataObject, StartSerial } from '../Utils/SerialData.js';
-import { SerialPortsList } from './SerialSelect.tsx';
+import { SerialDataObject, StartSerial, StartUDP, StopUDP } from '../Utils/SerialData.js';
+import { SerialPortSelect } from './SerialSelect.tsx';
+import { UDPPortSelect } from './UDPSelect.tsx';
 
 const menuFs = GlobalSettings.style.menuFs;
 
@@ -32,6 +35,7 @@ export default function GlobalSettingsPane() {
 
     const [baudRate, setBaudRate] = React.useState(SerialDataObject.baudRate);
     const [firstColumnTime, setFirstColumnTime] = React.useState(GlobalSettings.global.firstColumnTime);
+    const [inputMode, setInputMode] = React.useState(SerialDataObject.inputMode);
 
     const baudRateChange = ((event: any, newValue: any) => {
 
@@ -54,23 +58,76 @@ export default function GlobalSettingsPane() {
         StartSerial();
     };
 
+    const handleInputMode = (_event: any, newMode: 'serial' | 'udp') => {
+        if (!newMode) return;
+        // Close previous channel
+        try {
+            if (SerialDataObject.inputMode === 'udp' && SerialDataObject.udpSocket) {
+                // Stop UDP if switching away
+                StopUDP();
+            }
+            if (SerialDataObject.inputMode === 'serial' && SerialDataObject.serialObj && SerialDataObject.serialObj.isOpen) {
+                SerialDataObject.serialObj.close();
+            }
+        } catch (e) {
+            console.log('Error closing previous channel on mode switch:', e);
+        }
+
+        setInputMode(newMode);
+        SerialDataObject.inputMode = newMode;
+
+        // Open selected channel and auto play
+        try {
+            if (newMode === 'udp') {
+                const portToUse = SerialDataObject.udpPort || 5000;
+                StartUDP(portToUse);
+                SerialDataObject.pauseFlag = false;
+            } else if (newMode === 'serial') {
+                if (SerialDataObject.port && SerialDataObject.port.path) {
+                    StartSerial(SerialDataObject.port);
+                }
+                SerialDataObject.pauseFlag = false;
+            }
+        } catch (e) {
+            console.log('Error starting channel on mode switch:', e);
+        }
+    };
+
     return (
         <div style={{ flexGrow: 1 }}>
-            <SerialPortsList />
-            <Autocomplete
-                onChange={baudRateChange}
-                options={baudOptions}
-                defaultValue={defaultBaud}
-                autoHighlight
-                sx={{ fontSize: "12px", marginTop: "8px" }}
-                renderOption={(props, option) => (
-                    <li {...props} style={{ fontSize: menuFs }}> {option}</li>
-                )}
-                renderInput={(params) => (
-                    <TextField {...params} label="Baud Rate" variant="standard"
-                        InputProps={{ ...params.InputProps, style: { fontSize: menuFs } }} />
-                )}
-            />
+            <ToggleButtonGroup
+                exclusive
+                value={inputMode}
+                onChange={handleInputMode}
+                size="small"
+                sx={{ marginTop: '8px' }}
+            >
+                <ToggleButton value="serial">Serial</ToggleButton>
+                <ToggleButton value="udp">UDP</ToggleButton>
+            </ToggleButtonGroup>
+
+            { inputMode === 'serial' && (
+                <>
+                    <SerialPortSelect />
+                    <Autocomplete
+                        onChange={baudRateChange}
+                        options={baudOptions}
+                        defaultValue={defaultBaud}
+                        autoHighlight
+                        sx={{ fontSize: "12px", marginTop: "8px" }}
+                        renderOption={(props, option) => (
+                            <li {...props} style={{ fontSize: menuFs }}> {option}</li>
+                        )}
+                        renderInput={(params) => (
+                            <TextField {...params} label="Baud Rate" variant="standard"
+                                InputProps={{ ...params.InputProps, style: { fontSize: menuFs } }} />
+                        )}
+                    />
+                </>
+            )}
+            { inputMode === 'udp' && (
+                <UDPPortSelect />
+            )}
             <BufferSizeSlider />
             <SliderInput
                 disabled={false}

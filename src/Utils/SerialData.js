@@ -5,6 +5,8 @@ import { writeDataIfRecording } from "./DataRecording.js";
 const { SerialPort } = window.require("serialport");
 const { ReadlineParser } = window.require('@serialport/parser-readline')
 const { performance } = window.require('perf_hooks');
+// Built-in Node UDP module (available with nodeIntegration)
+const dgram = window.require('dgram');
 
 /* Functions to handle the serial port communication.
    Uses node "serialport". 
@@ -29,6 +31,10 @@ export var SerialDataObject = {
     rawData: [],
     dataIdx: [],
     serialObj: null,
+    // UDP support
+    udpSocket: null,
+    udpPort: null,
+    inputMode: 'serial', // 'serial' | 'udp'
     chartHeightRatio: 1,
     chartMarginRatio: 0.0,
     Iter: 0,
@@ -39,6 +45,11 @@ export var SerialDataObject = {
 }
 
 export function StartSerial(port) {
+    // Default to previously selected port if not provided
+    if (!port) {
+        port = SerialDataObject.port;
+    }
+    SerialDataObject.inputMode = 'serial';
 
     // Clear the data when the serial first starts
     SerialDataObject.rawData = [];
@@ -212,5 +223,147 @@ function idxData(n) {
         idxVec.push(i);
     }
     return (idxVec);
+}
+
+// ---------------------- UDP Support ---------------------- //
+export function StartUDP(portNumber) {
+    SerialDataObject.inputMode = 'udp';
+
+    // Clear data buffers and flags
+    SerialDataObject.rawData = [];
+    SerialDataObject.data = [];
+    SerialDataObject.dataIndex = [];
+    SerialDataObject.pauseFlag = false;
+    SerialDataObject.Iter = 0;
+    SerialDataObject.sampleHistory = [];
+    SerialDataObject.timeHistory = [];
+
+    // Close serial if open
+    if (SerialDataObject.serialObj !== null) {
+        try {
+            SerialDataObject.serialObj.close();
+        } catch (e) {
+            console.log('Error closing serial before UDP start:', e);
+        }
+        SerialDataObject.serialObj = null;
+    }
+
+    // Close previous UDP socket if exists
+    if (SerialDataObject.udpSocket !== null) {
+        try {
+            SerialDataObject.udpSocket.close();
+        } catch (e) {
+            console.log('Error closing previous UDP socket:', e);
+        }
+        SerialDataObject.udpSocket = null;
+    }
+
+    // Create UDP socket and bind
+    let toastId = toast(`Starting UDP listener on port ${portNumber}`);
+    try {
+        const socket = dgram.createSocket('udp4');
+        SerialDataObject.udpSocket = socket;
+        SerialDataObject.udpPort = portNumber;
+
+        socket.on('error', (err) => {
+            toast.dismiss(toastId);
+            toast.error(`UDP socket error on port ${portNumber}\n\n${err}`);
+            console.log('UDP socket error:', err);
+        });
+
+        socket.on('message', (msg/* Buffer */, rinfo) => {
+            if (SerialDataObject.pauseFlag) { return; }
+            let dataStr = '';
+            try {
+                dataStr = msg.toString('utf8').trim();
+            } catch (e) {
+                // ignore malformed buffer
+                return;
+            }
+            // Allow multiple lines in one datagram
+            const lines = dataStr.split(/\r?\n/).filter(l => l.length > 0);
+            for (const line of lines) {
+                addUdpData(line);
+            }
+        });
+
+        socket.bind(portNumber, () => {
+            console.log('UDP socket bound on port', portNumber);
+            toast.update(toastId, { render: `UDP listening on port ${portNumber}`, type: toast.TYPE.INFO, autoClose: 2000 });
+        });
+
+    } catch (e) {
+        toast.dismiss(toastId);
+        toast.error(`Failed to start UDP on port ${portNumber}\n\n${e}`);
+        console.log('Failed to start UDP:', e);
+    }
+
+    function addUdpData(data) {
+        // Decimation
+        if (decIndex >= GlobalSettings.global.decimation) {
+            decIndex = 1;
+        } else {
+            decIndex += 1;
+            return;
+        }
+
+        SerialDataObject.Iter += 1;
+        if (SerialDataObject.Iter % SerialDataObject.NsampleRateUpdate === 0) {
+            if (SerialDataObject.sampleHistory.length > 1) {
+                var deltaT = SerialDataObject.timeHistory[SerialDataObject.timeHistory.length - 1] - SerialDataObject.timeHistory[0];
+                var samples = SerialDataObject.sampleHistory[SerialDataObject.sampleHistory.length - 1] - SerialDataObject.sampleHistory[0];
+                SerialDataObject.sampleRate = samples / deltaT * 1000;
+            }
+        }
+
+        SerialDataObject.rawData.push(data);
+        if (SerialDataObject.rawData.length >= SerialDataObject.bufferSize) {
+            SerialDataObject.rawData.shift();
+        }
+
+        writeDataIfRecording(data);
+
+        var splitData = data.split(/\s+|,\s+/);
+        var nums = splitData.map(parseFloat);
+        var t = 0;
+        if (GlobalSettings.global.firstColumnTime) {
+            t = nums[0];
+            nums = nums.slice(1, nums.length);
+        } else {
+            t = performance.now();
+        }
+
+        if (nums.every((value) => { return !isNaN(value) })) {
+            SerialDataObject.data.push(nums);
+            SerialDataObject.sampleHistory.push(SerialDataObject.Iter);
+            SerialDataObject.timeHistory.push(t);
+        }
+
+        var n = SerialDataObject.data.length;
+        if (n > SerialDataObject.bufferSize) {
+            const resize = (v) => v.slice(v.length - SerialDataObject.bufferSize, v.length);
+            SerialDataObject.data = resize(SerialDataObject.data);
+            SerialDataObject.sampleHistory = resize(SerialDataObject.sampleHistory);
+            SerialDataObject.timeHistory = resize(SerialDataObject.timeHistory);
+            if (!GlobalSettings.timeSeries.scroll) {
+                SerialDataObject.data = [];
+                SerialDataObject.sampleHistory = [];
+                SerialDataObject.timeHistory = [];
+            }
+        }
+        SerialDataObject.dataIdx = idxData(SerialDataObject.data.length);
+    }
+}
+
+export function StopUDP() {
+    if (SerialDataObject.udpSocket) {
+        try {
+            SerialDataObject.udpSocket.close();
+        } catch (e) {
+            console.log('Error closing UDP socket:', e);
+        }
+        SerialDataObject.udpSocket = null;
+        SerialDataObject.udpPort = null;
+    }
 }
 
