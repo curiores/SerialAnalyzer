@@ -12,6 +12,7 @@ const menuFs = GlobalSettings.style.menuFs;
 /* Settings pane for the serial monitor */
 export default function MonitorSettings() {
     const [showTs, setShowTs] = useState(!!GlobalSettings.monitor.showTimestamp);
+    const [showValsOnly, setShowValsOnly] = useState(!!GlobalSettings.monitor.showValuesOnly);
     return (
         <div>
             <SliderInput
@@ -32,6 +33,13 @@ export default function MonitorSettings() {
                         name="showTimestamp"
                         size="small" />}
                     label={<Typography sx={{ fontSize: menuFs, userSelect: "none" }}>Show timestamp</Typography>} />
+                <FormControlLabel
+                    control={<Checkbox
+                        checked={showValsOnly}
+                        onChange={(e) => { const v = e.target.checked; setShowValsOnly(v); GlobalSettings.monitor.showValuesOnly = v; }}
+                        name="showRaw"
+                        size="small" />}
+                    label={<Typography sx={{ fontSize: menuFs, userSelect: "none" }}>RAW Values</Typography>} />
             </FormGroup>
         </div>
     )

@@ -40,6 +40,7 @@ export var GlobalSettings = {
         fontSize: 12,
         refreshRate: 50,
         showTimestamp: false,
+        showValuesOnly: false,
     },
     record: {
         recording: false,

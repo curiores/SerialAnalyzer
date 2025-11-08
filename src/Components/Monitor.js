@@ -56,18 +56,37 @@ export default class Monitor extends React.Component {
         const ms = pad(d.getMilliseconds(),3);
         return `[${h}:${m}:${s}.${ms}]`;
       };
-      let text = '';
-      if (withTs && Array.isArray(SerialDataObject.rawDataTime)) {
-        const n = SerialDataObject.rawData.length;
-        const lines = new Array(n);
-        for (let i = 0; i < n; i++) {
-          const ts = SerialDataObject.rawDataTime[i];
-          lines[i] = (ts !== undefined ? `${formatTs(ts)} ` : '') + SerialDataObject.rawData[i];
+      // Helper to extract only numeric values from a raw line
+      const valuesOnly = (line) => {
+        if (!line || typeof line !== 'string') return '';
+        const tokens = line.split(/[\,\t ]+/).filter(t => t.length > 0);
+        const vals = [];
+        for (let t of tokens) {
+          let vstr = t;
+          const coli = t.indexOf(':');
+          if (coli !== -1) {
+            vstr = t.slice(coli + 1).trim();
+          }
+          // Accept scientific notation and decimals
+          const v = parseFloat(vstr);
+          if (!Number.isNaN(v) && Number.isFinite(v)) {
+            vals.push(vstr);
+          }
         }
-        text = lines.join('\n');
-      } else {
-        text = SerialDataObject.rawData.join('\n');
+        return vals.join('\t');
+      };
+
+      let text = '';
+      const n = SerialDataObject.rawData.length;
+      const lines = new Array(n);
+      // Checkbox marcado => mostrar RAW; desmarcado => apenas valores
+      const onlyValues = !GlobalSettings.monitor.showValuesOnly;
+      for (let i = 0; i < n; i++) {
+        const tsPrefix = (withTs && Array.isArray(SerialDataObject.rawDataTime)) ? formatTs(SerialDataObject.rawDataTime[i]) + ' ' : '';
+        const body = onlyValues ? valuesOnly(SerialDataObject.rawData[i]) : SerialDataObject.rawData[i];
+        lines[i] = tsPrefix + body;
       }
+      text = lines.join('\n');
       this.divRef.current.innerText = text;
       this.divRef.current.style.fontSize = GlobalSettings.monitor.fontSize / 12.0 * 0.85 + "rem";
       if(GlobalSettings.global.drawerOpen){
