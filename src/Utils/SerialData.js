@@ -46,6 +46,8 @@ export var SerialDataObject = {
     // Variable metadata (names/units) parsed from incoming stream
     varNames: [],
     varUnits: [],
+    // File import
+    dataSource: 'live', // 'live' | 'file'
 }
 
 export function StartSerial(port) {
@@ -276,6 +278,141 @@ function idxData(n) {
     return (idxVec);
 }
 
+// ---------------------- File Import ---------------------- //
+const { ipcRenderer } = window.require('electron');
+const path = window.require('path');
+
+function parseTimestampTag(line) {
+    // Matches [hh:mm:ss.mmm] prefix
+    const m = line.match(/^\[(\d{2}):(\d{2}):(\d{2})\.(\d{3})\]\s+(.*)$/);
+    if (!m) { return { ts: null, text: line }; }
+    const hh = parseInt(m[1], 10);
+    const mm = parseInt(m[2], 10);
+    const ss = parseInt(m[3], 10);
+    const ms = parseInt(m[4], 10);
+    const rest = m[5];
+    const now = new Date();
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, ss, ms);
+    return { ts: d.getTime(), text: rest };
+}
+
+function processDataLine(data, tsOverride = null) {
+    // Push raw line and timestamp (either override or wall clock)
+    SerialDataObject.rawData.push(data);
+    SerialDataObject.rawDataTime.push(tsOverride !== null ? tsOverride : Date.now());
+    if (SerialDataObject.rawData.length >= SerialDataObject.bufferSize) {
+        SerialDataObject.rawData.shift();
+        SerialDataObject.rawDataTime.shift();
+    }
+
+    // Parse tokens supporting "name(unit): value" or plain numeric
+    var splitData = data.split(/\s+|,\s+/);
+    var namesParsed = [];
+    var unitsParsed = [];
+    var nums = [];
+    for (let tok of splitData) {
+        if (!tok) { continue; }
+        const colonIdx = tok.indexOf(":");
+        if (colonIdx !== -1) {
+            const namePart = tok.slice(0, colonIdx).trim();
+            const valPart = tok.slice(colonIdx + 1).trim();
+            let name = namePart;
+            let unit = null;
+            const m = namePart.match(/^(.*?)\s*\((.*?)\)\s*$/);
+            if (m) {
+                name = m[1].trim();
+                unit = m[2].trim();
+            }
+            namesParsed.push(name);
+            unitsParsed.push(unit);
+            nums.push(parseFloat(valPart));
+        } else {
+            namesParsed.push(null);
+            unitsParsed.push(null);
+            nums.push(parseFloat(tok));
+        }
+    }
+    var t = 0;
+    if (GlobalSettings.global.firstColumnTime) {
+        t = nums[0];
+        nums = nums.slice(1, nums.length);
+        namesParsed = namesParsed.slice(1, namesParsed.length);
+        unitsParsed = unitsParsed.slice(1, unitsParsed.length);
+    } else {
+        t = performance.now();
+    }
+
+    if (nums.every((value) => { return !isNaN(value) })) {
+        SerialDataObject.data.push(nums);
+        SerialDataObject.Iter += 1;
+        SerialDataObject.sampleHistory.push(SerialDataObject.Iter);
+        SerialDataObject.timeHistory.push(t);
+        const nvars = nums.length;
+        const newNames = new Array(nvars);
+        const newUnits = new Array(nvars);
+        for (let i = 0; i < nvars; i++) {
+            const nm = namesParsed[i];
+            const un = unitsParsed[i];
+            newNames[i] = (nm && nm.length > 0) ? nm : (SerialDataObject.varNames[i] || null);
+            newUnits[i] = (un && un.length > 0) ? un : (SerialDataObject.varUnits[i] || null);
+        }
+        SerialDataObject.varNames = newNames;
+        SerialDataObject.varUnits = newUnits;
+    }
+
+    // Buffer management
+    var n = SerialDataObject.data.length;
+    if (n > SerialDataObject.bufferSize) {
+        const resize = (v) => v.slice(v.length - SerialDataObject.bufferSize, v.length);
+        SerialDataObject.data = resize(SerialDataObject.data);
+        SerialDataObject.sampleHistory = resize(SerialDataObject.sampleHistory);
+        SerialDataObject.timeHistory = resize(SerialDataObject.timeHistory);
+        if (!GlobalSettings.timeSeries.scroll) {
+            SerialDataObject.data = [];
+            SerialDataObject.sampleHistory = [];
+            SerialDataObject.timeHistory = [];
+        }
+    }
+    SerialDataObject.dataIdx = idxData(SerialDataObject.data.length);
+}
+
+export async function LoadFromFileDialog() {
+    const result = await ipcRenderer.invoke('dialog', 'showOpenDialog', { properties: ['openFile'], filters: [{ name: 'Text', extensions: ['txt'] }, { name: 'All Files', extensions: ['*'] }] });
+    if (!result.canceled && result.filePaths && result.filePaths.length > 0) {
+        await LoadFromFile(result.filePaths[0]);
+    }
+}
+
+export async function LoadFromFile(filePath) {
+    try {
+        // Read content
+        const content = await ipcRenderer.invoke('fse', 'readFile', filePath, 'utf8');
+        const lines = content.split(/\r?\n/).filter(l => l.length > 0);
+
+        // Reset buffers
+        SerialDataObject.dataSource = 'file';
+        SerialDataObject.inputMode = 'serial';
+        SerialDataObject.rawData = [];
+        SerialDataObject.rawDataTime = [];
+        SerialDataObject.data = [];
+        SerialDataObject.dataIdx = [];
+        SerialDataObject.pauseFlag = false;
+        SerialDataObject.Iter = 0;
+        SerialDataObject.sampleHistory = [];
+        SerialDataObject.timeHistory = [];
+        SerialDataObject.varNames = [];
+        SerialDataObject.varUnits = [];
+        SerialDataObject.port = { path: null, friendlyName: `File: ${path.basename(filePath)}` };
+
+        // Process lines
+        for (const line of lines) {
+            const { ts, text } = parseTimestampTag(line);
+            processDataLine(text, ts);
+        }
+    } catch (e) {
+        console.log('Failed to load file:', e);
+    }
+}
 // ---------------------- UDP Support ---------------------- //
 export function StartUDP(portNumber) {
     SerialDataObject.inputMode = 'udp';

@@ -6,6 +6,7 @@ import { styled } from '@mui/material/styles';
 
 import { GlobalSettings } from "../Utils/GlobalSettings.js";
 import { selectOutputDirectory } from '../Utils/DataRecording.js'
+import { LoadFromFileDialog } from '../Utils/SerialData.js'
 
 const { ipcRenderer } = window.require('electron');
 
@@ -56,6 +57,11 @@ export default function RecordSettings() {
             <LimitedLengthTypography>
                 {directory}
             </LimitedLengthTypography>
+            <div style={{ marginTop: '8px' }}>
+                <Button variant="outlined" onClick={LoadFromFileDialog} size="medium" fullWidth>
+                    Load recording file
+                </Button>
+            </div>
         </div>
     )
 }
