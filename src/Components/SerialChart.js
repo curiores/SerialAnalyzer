@@ -141,6 +141,12 @@ export default class SerialChart extends React.Component {
           for (var i = 0; i < chart.data.datasets.length; i++) {
             chart.data.datasets[i].borderWidth = GlobalSettings.global.lineThickness;
             chart.data.datasets[i].pointRadius = GlobalSettings.global.pointRadius;
+            // Update label using parsed variable names/units if available
+            let lbl = (i + 1).toString();
+            if (Array.isArray(SerialDataObject.varNames) && typeof SerialDataObject.varNames[i] !== 'undefined' && SerialDataObject.varNames[i] !== null) {
+              lbl = SerialDataObject.varNames[i];
+            }
+            chart.data.datasets[i].label = lbl;
           }
 
           // Update with data from the serial port
@@ -181,6 +187,13 @@ export default class SerialChart extends React.Component {
         }
         newOps.scales.y.max = GlobalSettings.timeSeries.ymax;
         newOps.scales.y.min = GlobalSettings.timeSeries.ymin;
+        // Apply unit to Y axis title using the first variable's unit, if available
+        let yUnit = (Array.isArray(SerialDataObject.varUnits) && SerialDataObject.varUnits.length > 0) ? SerialDataObject.varUnits[0] : null;
+        if (yUnit) {
+          newOps.scales.y.title = { display: true, text: yUnit };
+        } else {
+          newOps.scales.y.title = { display: false };
+        }
         newOps.plugins.title.text = SerialDataObject.port.friendlyName;
 
         chart.options = newOps;

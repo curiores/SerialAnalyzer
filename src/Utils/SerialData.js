@@ -42,7 +42,10 @@ export var SerialDataObject = {
     sampleHistory: [],
     timeHistory: [],
     sampleRate: 0,
-    NsampleRateUpdate: 10 // Update the sample rate after this many samples
+    NsampleRateUpdate: 10, // Update the sample rate after this many samples
+    // Variable metadata (names/units) parsed from incoming stream
+    varNames: [],
+    varUnits: [],
 }
 
 export function StartSerial(port) {
@@ -61,6 +64,12 @@ export function StartSerial(port) {
     SerialDataObject.Iter = 0;
     SerialDataObject.sampleHistory = [];
     SerialDataObject.timeHistory = [];
+    SerialDataObject.varNames = [];
+    SerialDataObject.varUnits = [];
+    SerialDataObject.varNames = [];
+    SerialDataObject.varUnits = [];
+    SerialDataObject.varNames = [];
+    SerialDataObject.varUnits = [];
 
     // Always try to close the serial object before starting one
     if (SerialDataObject.serialObj !== null) {
@@ -178,13 +187,39 @@ function serialSetup(port) {
         // If we're recording, write each data row to the file
         writeDataIfRecording(data);
         
-        // Now parse the numeric data
+        // Now parse tokens supporting "name(unit): value" or plain numeric
         var splitData = data.split(/\s+|,\s+/);
-        var nums = splitData.map(parseFloat);
+        var namesParsed = [];
+        var unitsParsed = [];
+        var nums = [];
+        for (let tok of splitData) {
+            if (!tok) { continue; }
+            const colonIdx = tok.indexOf(":");
+            if (colonIdx !== -1) {
+                const namePart = tok.slice(0, colonIdx).trim();
+                const valPart = tok.slice(colonIdx + 1).trim();
+                let name = namePart;
+                let unit = null;
+                const m = namePart.match(/^(.*?)\s*\((.*?)\)\s*$/);
+                if (m) {
+                    name = m[1].trim();
+                    unit = m[2].trim();
+                }
+                namesParsed.push(name);
+                unitsParsed.push(unit);
+                nums.push(parseFloat(valPart));
+            } else {
+                namesParsed.push(null);
+                unitsParsed.push(null);
+                nums.push(parseFloat(tok));
+            }
+        }
         var t = 0;
         if (GlobalSettings.global.firstColumnTime) {
             t = nums[0];
             nums = nums.slice(1, nums.length);
+            namesParsed = namesParsed.slice(1, namesParsed.length);
+            unitsParsed = unitsParsed.slice(1, unitsParsed.length);
         }
         else {
             t = performance.now();
@@ -196,6 +231,18 @@ function serialSetup(port) {
             SerialDataObject.data.push(nums);
             SerialDataObject.sampleHistory.push(SerialDataObject.Iter);
             SerialDataObject.timeHistory.push(t);
+            // Update variable names/units (keep latest non-null names)
+            const nvars = nums.length;
+            const newNames = new Array(nvars);
+            const newUnits = new Array(nvars);
+            for (let i = 0; i < nvars; i++) {
+                const nm = namesParsed[i];
+                const un = unitsParsed[i];
+                newNames[i] = (nm && nm.length > 0) ? nm : (SerialDataObject.varNames[i] || null);
+                newUnits[i] = (un && un.length > 0) ? un : (SerialDataObject.varUnits[i] || null);
+            }
+            SerialDataObject.varNames = newNames;
+            SerialDataObject.varUnits = newUnits;
         }
 
         var n = SerialDataObject.data.length;
@@ -331,11 +378,37 @@ export function StartUDP(portNumber) {
         writeDataIfRecording(data);
 
         var splitData = data.split(/\s+|,\s+/);
-        var nums = splitData.map(parseFloat);
+        var namesParsed = [];
+        var unitsParsed = [];
+        var nums = [];
+        for (let tok of splitData) {
+            if (!tok) { continue; }
+            const colonIdx = tok.indexOf(":");
+            if (colonIdx !== -1) {
+                const namePart = tok.slice(0, colonIdx).trim();
+                const valPart = tok.slice(colonIdx + 1).trim();
+                let name = namePart;
+                let unit = null;
+                const m = namePart.match(/^(.*?)\s*\((.*?)\)\s*$/);
+                if (m) {
+                    name = m[1].trim();
+                    unit = m[2].trim();
+                }
+                namesParsed.push(name);
+                unitsParsed.push(unit);
+                nums.push(parseFloat(valPart));
+            } else {
+                namesParsed.push(null);
+                unitsParsed.push(null);
+                nums.push(parseFloat(tok));
+            }
+        }
         var t = 0;
         if (GlobalSettings.global.firstColumnTime) {
             t = nums[0];
             nums = nums.slice(1, nums.length);
+            namesParsed = namesParsed.slice(1, namesParsed.length);
+            unitsParsed = unitsParsed.slice(1, unitsParsed.length);
         } else {
             t = performance.now();
         }
@@ -344,6 +417,17 @@ export function StartUDP(portNumber) {
             SerialDataObject.data.push(nums);
             SerialDataObject.sampleHistory.push(SerialDataObject.Iter);
             SerialDataObject.timeHistory.push(t);
+            const nvars = nums.length;
+            const newNames = new Array(nvars);
+            const newUnits = new Array(nvars);
+            for (let i = 0; i < nvars; i++) {
+                const nm = namesParsed[i];
+                const un = unitsParsed[i];
+                newNames[i] = (nm && nm.length > 0) ? nm : (SerialDataObject.varNames[i] || null);
+                newUnits[i] = (un && un.length > 0) ? un : (SerialDataObject.varUnits[i] || null);
+            }
+            SerialDataObject.varNames = newNames;
+            SerialDataObject.varUnits = newUnits;
         }
 
         var n = SerialDataObject.data.length;
