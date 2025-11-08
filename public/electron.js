@@ -9,6 +9,8 @@ app.allowRendererProcessReuse = false
 
 // Create the native browser window.
 function createWindow() {
+  const version = app.getVersion();
+  const baseTitle = app.getName();
   const mainWindow = new BrowserWindow({
     width: 950,
     height: 700,
@@ -19,6 +21,7 @@ function createWindow() {
         color: 'rgb(37,37,38)',
         symbolColor: '#74b1be'
     },
+    title: `${baseTitle} v${version}`,
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
@@ -38,6 +41,9 @@ function createWindow() {
       })
     : "http://localhost:3000";
   mainWindow.loadURL(appURL);
+
+  // Ensure title reflects version even after navigation
+  mainWindow.setTitle(`${baseTitle} v${version}`);
 
   // Automatically open Chrome's DevTools in development mode.
   if (!app.isPackaged) {
@@ -77,6 +83,24 @@ app.whenReady().then(() => {
     const res = await fse[method](...args);
     return res;
   });
+
+    // Provide app version to renderer via IPC
+    ipcMain.handle('getAppVersion', async () => {
+      try {
+        return app.getVersion();
+      } catch (e) {
+        return '';
+      }
+    });
+
+    // Provide app name to renderer via IPC
+    ipcMain.handle('getAppName', async () => {
+      try {
+        return app.getName();
+      } catch (e) {
+        return '';
+      }
+    });
 
   app.on("activate", function () {
     // On macOS it's common to re-create a window in the app when the
