@@ -25,6 +25,21 @@ Build the app:
 <br> &nbsp; &nbsp; <code>yarn electron:package:mac</code>
 
 ### Updates:
+<b>V1.2.0</b>
+* Added UDP input support
+    * Stream data over network (e.g., from Wi-Fi sensors like ESP32 accelerometers) via configurable port
+* Added optional timestamps
+    * Toggle to show timestamps in the live monitor
+    * Include timestamps in recorded files when enabled
+* Added labeled variable format
+    * Support structured input with headers like time(s),accel_x(m/s²),temp(°C)
+    * Auto-generate plot legends and column names from headers
+* Added display mode toggle
+    * Choose between RAW (original byte stream) and Variables (clean parsed values only) in the monitor
+* Added recording playback
+    * Load previously saved .txt recordings for offline analysis, replay, or sharing
+    * Uses the same parsing and visualization pipeline as live data
+
 <b>V1.1.0</b>
 * Added a record option
     * Only records the raw serial data to a text file
