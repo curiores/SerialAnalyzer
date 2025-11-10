@@ -33,21 +33,41 @@ export function nextPowerOf2(x){
 }
 
 export function autoResize(){
-
     if(GlobalSettings.timeSeries.autoScale && !SerialDataObject.pauseFlag){
-        // Min and max of y
-        var ymin = Math.min(...SerialDataObject.data.flat());
-        var ymax = Math.max(...SerialDataObject.data.flat());
-        // Give it some standardized space
-        var ymid = (ymax+ymin)/2;
-        var dy = ymax - ymid;
-        var dyNext = nextPowerOf2(dy);
-        var nearestValue = 1;
-        if(dy > 2){
-            nearestValue = 5;
+        // Collect values only from visible variables
+        const dataRows = SerialDataObject.data;
+        if(!Array.isArray(dataRows) || dataRows.length === 0){ return; }
+        const nvars = dataRows[dataRows.length - 1].length || 0;
+        let vis = SerialDataObject.visibleVars;
+        // Initialize visibility if missing or mismatched
+        if(!Array.isArray(vis) || vis.length !== nvars){
+            vis = new Array(nvars).fill(true);
+            SerialDataObject.visibleVars = vis;
         }
-        var yminUpdate = Math.floor( (ymid - dyNext)/nearestValue)*nearestValue;
-        var ymaxUpdate = Math.ceil( ( ymid + dyNext)/nearestValue)*nearestValue;
+
+        const values = [];
+        for(const row of dataRows){
+            for(let j=0;j<nvars;j++){
+                if(vis[j] === true) {
+                    const v = row[j];
+                    if(typeof v === 'number' && !isNaN(v)) values.push(v);
+                }
+            }
+        }
+        if(values.length === 0){ return; }
+
+        let ymin = Math.min(...values);
+        let ymax = Math.max(...values);
+        // If constant values, create a small symmetrical range
+        if(ymax === ymin){
+            const pad = Math.max(1, Math.abs(ymin) * 0.05);
+            ymin -= pad;
+            ymax += pad;
+        }
+        const span = ymax - ymin;
+        const margin = span * 0.05; // 5% margin
+        const yminUpdate = ymin - margin;
+        const ymaxUpdate = ymax + margin;
 
         if(!isNaN(yminUpdate)){
             GlobalSettings.timeSeries.ymin = yminUpdate;

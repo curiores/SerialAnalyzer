@@ -46,6 +46,8 @@ export var SerialDataObject = {
     // Variable metadata (names/units) parsed from incoming stream
     varNames: [],
     varUnits: [],
+    // Visibility state per variable (true = visible)
+    visibleVars: [],
     // File import
     dataSource: 'live', // 'live' | 'file'
 }
