@@ -96,7 +96,12 @@ var defaultChartOptions = {
       },
       ticks: {
         color: plotFontColor,
-        callback: (val) => (val.toString().padStart(padChars - val.toString().length, " "))
+        callback: (val) => {
+          const v = Math.round(val);
+          const s = v.toString();
+          const total = Math.max(0, padChars - s.length);
+          return s.padStart(total, " ");
+        }
       }
     }
   }
