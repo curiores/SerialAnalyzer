@@ -232,6 +232,12 @@ export default class Spectrum extends React.Component{
           for (var i = 0; i < chart.data.datasets.length; i++){
             chart.data.datasets[i].borderWidth = GlobalSettings.global.lineThickness;
             chart.data.datasets[i].pointRadius = GlobalSettings.global.pointRadius;
+            // Atualiza o rótulo usando apenas o nome parseado, sem unidade
+            let lbl = (i + 1).toString();
+            if (Array.isArray(SerialDataObject.varNames) && typeof SerialDataObject.varNames[i] !== 'undefined' && SerialDataObject.varNames[i] !== null) {
+              lbl = SerialDataObject.varNames[i];
+            }
+            chart.data.datasets[i].label = lbl;
           }
 
           // Compute the sample rate

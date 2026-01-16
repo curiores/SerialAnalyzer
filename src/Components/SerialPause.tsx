@@ -11,7 +11,7 @@ import { GlobalSettings } from "../Utils/GlobalSettings.js";
 import { selectOutputDirectory, setNextOutputFilename } from '../Utils/DataRecording.js'
 import { toast } from 'react-toastify';
 
-import { SerialDataObject, StartSerial } from '../Utils/SerialData';
+import { SerialDataObject, StartSerial, StartUDP, StopUDP } from '../Utils/SerialData';
 
 const IconButton = styled(MuiIconButton)({
     "&":{
@@ -66,20 +66,30 @@ export default function SerialPause() {
     }
 
     function playCallback(){
-        
-        if(SerialDataObject.serialObj !== null ){
-            // If the object is already open and paused, play it
-            if(SerialDataObject.serialObj.isOpen && SerialDataObject.pauseFlag === true){
-                // In this case, only the pause flag needs to be updated
+        if(SerialDataObject.inputMode === 'udp'){
+            // If UDP is already listening and paused, just unpause
+            if(SerialDataObject.udpSocket && SerialDataObject.pauseFlag === true){
+                // nothing to restart, will resume below
+            } else {
+                // Start UDP if not running; default to a valid port
+                const portToUse = SerialDataObject.udpPort || 5000;
+                StartUDP(portToUse);
+            }
+        } else {
+            if(SerialDataObject.serialObj !== null ){
+                // If the object is already open and paused, play it
+                if(SerialDataObject.serialObj.isOpen && SerialDataObject.pauseFlag === true){
+                    // In this case, only the pause flag needs to be updated
+                }
+                else{
+                    // Otherwise, restart the serial port
+                    StartSerial(SerialDataObject.port);    
+                }
             }
             else{
                 // Otherwise, restart the serial port
-                StartSerial(SerialDataObject.port);    
+                StartSerial();    
             }
-        }
-        else{
-            // Otherwise, restart the serial port
-            StartSerial();    
         }
         SerialDataObject.pauseFlag = false;
         setRunning(true);
@@ -88,14 +98,18 @@ export default function SerialPause() {
     }
 
     function stopCallback(){
-        if(SerialDataObject.serialObj !== null){
-            // Close the serial port
-            console.log(SerialDataObject.serialObj)
-            SerialDataObject.serialObj.close((err) => {
-                console.log("Stop?" + err)
-            });
+        if(SerialDataObject.inputMode === 'udp'){
+            StopUDP();
+        } else {
+            if(SerialDataObject.serialObj !== null){
+                // Close the serial port
+                console.log(SerialDataObject.serialObj)
+                SerialDataObject.serialObj.close((err) => {
+                    console.log("Stop?" + err)
+                });
+            }
+            console.log(SerialDataObject.port)
         }
-        console.log(SerialDataObject.port)
 
         setStopped(true);
         setPaused(false);
@@ -128,13 +142,24 @@ export default function SerialPause() {
     var timer = null;
     React.useEffect(() => {
         timer = setInterval(() => {
-            if(SerialDataObject.serialObj !== null ){
-                // If the object is already open not paused, then allow the pause and stop buttons
-                if(SerialDataObject.serialObj.isOpen && SerialDataObject.pauseFlag !== true){
+            const serialRunning = (SerialDataObject.serialObj !== null && SerialDataObject.serialObj.isOpen);
+            const udpRunning = (SerialDataObject.udpSocket !== null);
+            if (serialRunning || udpRunning) {
+                if (SerialDataObject.pauseFlag !== true) {
                     setStopped(false);
                     setPaused(false);
                     setRunning(true);
+                } else {
+                    // Paused while channel is active
+                    setPaused(true);
+                    setRunning(false);
+                    setStopped(false);
                 }
+            } else {
+                // No active channel: reflect fully stopped state
+                setStopped(true);
+                setPaused(false);
+                setRunning(false);
             }
         }, 1000); 
         return () => {

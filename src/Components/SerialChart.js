@@ -46,6 +46,19 @@ var defaultChartOptions = {
       position: 'right',
       labels: {
         color: plotFontColor
+      },
+      onClick: (e, legendItem, legend) => {
+        const chart = legend.chart;
+        const idx = legendItem.datasetIndex;
+        const currentlyVisible = chart.isDatasetVisible(idx);
+        chart.setDatasetVisibility(idx, !currentlyVisible);
+        // Update visibility state for autoscale
+        const nvars = chart.data.datasets.length;
+        if (!Array.isArray(SerialDataObject.visibleVars) || SerialDataObject.visibleVars.length !== nvars) {
+          SerialDataObject.visibleVars = new Array(nvars).fill(true);
+        }
+        SerialDataObject.visibleVars[idx] = !currentlyVisible;
+        chart.update();
       }
     },
     title: {
@@ -83,7 +96,12 @@ var defaultChartOptions = {
       },
       ticks: {
         color: plotFontColor,
-        callback: (val) => (val.toString().padStart(padChars - val.toString().length, " "))
+        callback: (val) => {
+          const v = Math.round(val);
+          const s = v.toString();
+          const total = Math.max(0, padChars - s.length);
+          return s.padStart(total, " ");
+        }
       }
     }
   }
@@ -141,6 +159,21 @@ export default class SerialChart extends React.Component {
           for (var i = 0; i < chart.data.datasets.length; i++) {
             chart.data.datasets[i].borderWidth = GlobalSettings.global.lineThickness;
             chart.data.datasets[i].pointRadius = GlobalSettings.global.pointRadius;
+            // Update label using parsed variable names/units if available
+            let lbl = (i + 1).toString();
+            if (Array.isArray(SerialDataObject.varNames) && typeof SerialDataObject.varNames[i] !== 'undefined' && SerialDataObject.varNames[i] !== null) {
+              lbl = SerialDataObject.varNames[i];
+            }
+            chart.data.datasets[i].label = lbl;
+          }
+
+          // Ensure visibility state length matches number of variables
+          if (!Array.isArray(SerialDataObject.visibleVars) || SerialDataObject.visibleVars.length !== chart.data.datasets.length) {
+            const current = Array.isArray(SerialDataObject.visibleVars) ? SerialDataObject.visibleVars : [];
+            const needed = chart.data.datasets.length - current.length;
+            SerialDataObject.visibleVars = needed > 0
+              ? [...current, ...new Array(needed).fill(true)]
+              : current.slice(0, chart.data.datasets.length);
           }
 
           // Update with data from the serial port
@@ -181,6 +214,21 @@ export default class SerialChart extends React.Component {
         }
         newOps.scales.y.max = GlobalSettings.timeSeries.ymax;
         newOps.scales.y.min = GlobalSettings.timeSeries.ymin;
+        // Apply unit to Y axis title using the first VISIBLE variable's unit, if available
+        let yUnit = null;
+        if (Array.isArray(SerialDataObject.varUnits) && SerialDataObject.varUnits.length > 0) {
+          const vis = Array.isArray(SerialDataObject.visibleVars) ? SerialDataObject.visibleVars : [];
+          for (let i = 0; i < SerialDataObject.varUnits.length; i++) {
+            const unit = SerialDataObject.varUnits[i];
+            const isVisible = (vis.length === 0) ? true : !!vis[i];
+            if (isVisible && unit) { yUnit = unit; break; }
+          }
+        }
+        if (yUnit) {
+          newOps.scales.y.title = { display: true, text: yUnit };
+        } else {
+          newOps.scales.y.title = { display: false };
+        }
         newOps.plugins.title.text = SerialDataObject.port.friendlyName;
 
         chart.options = newOps;

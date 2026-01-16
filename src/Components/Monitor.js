@@ -46,7 +46,48 @@ export default class Monitor extends React.Component {
       this.divRef.current.style.marginTop = 0.04 * parentHeight + 'px';
       this.divRef.current.style.height = 0.9 * SerialDataObject.chartHeightRatio * parentHeight + 'px';
       // this.divRef.current.innerText = this.divRef.current.innerText  + ".... \n";
-      this.divRef.current.innerText = SerialDataObject.rawData.join('\n');
+      const withTs = GlobalSettings.monitor.showTimestamp;
+      const formatTs = (ts) => {
+        const d = new Date(ts);
+        const pad = (n, w=2) => String(n).padStart(w,'0');
+        const h = pad(d.getHours());
+        const m = pad(d.getMinutes());
+        const s = pad(d.getSeconds());
+        const ms = pad(d.getMilliseconds(),3);
+        return `[${h}:${m}:${s}.${ms}]`;
+      };
+      // Helper to extract only numeric values from a raw line
+      const valuesOnly = (line) => {
+        if (!line || typeof line !== 'string') return '';
+        const tokens = line.split(/[\,\t ]+/).filter(t => t.length > 0);
+        const vals = [];
+        for (let t of tokens) {
+          let vstr = t;
+          const coli = t.indexOf(':');
+          if (coli !== -1) {
+            vstr = t.slice(coli + 1).trim();
+          }
+          // Accept scientific notation and decimals
+          const v = parseFloat(vstr);
+          if (!Number.isNaN(v) && Number.isFinite(v)) {
+            vals.push(vstr);
+          }
+        }
+        return vals.join('\t');
+      };
+
+      let text = '';
+      const n = SerialDataObject.rawData.length;
+      const lines = new Array(n);
+      // Checkbox marcado => mostrar RAW; desmarcado => apenas valores
+      const onlyValues = !GlobalSettings.monitor.showValuesOnly;
+      for (let i = 0; i < n; i++) {
+        const tsPrefix = (withTs && Array.isArray(SerialDataObject.rawDataTime)) ? formatTs(SerialDataObject.rawDataTime[i]) + ' ' : '';
+        const body = onlyValues ? valuesOnly(SerialDataObject.rawData[i]) : SerialDataObject.rawData[i];
+        lines[i] = tsPrefix + body;
+      }
+      text = lines.join('\n');
+      this.divRef.current.innerText = text;
       this.divRef.current.style.fontSize = GlobalSettings.monitor.fontSize / 12.0 * 0.85 + "rem";
       if(GlobalSettings.global.drawerOpen){
         this.divRef.current.style.maxWidth = "calc(86vw - " + GlobalSettings.style.drawerWidth + "px)";
