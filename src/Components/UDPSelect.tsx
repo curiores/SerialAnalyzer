@@ -2,7 +2,7 @@ import * as React from 'react';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { GlobalSettings } from "../Utils/GlobalSettings.js";
-import { SerialDataObject } from '../Utils/SerialData';
+import { SerialDataObject, StopUDP } from '../Utils/SerialData';
 
 const titleFs = GlobalSettings.style.menuFs;
 
@@ -28,6 +28,12 @@ export function UDPPortSelect() {
           if (!isNaN(val)) {
             // Clamp to valid UDP port range
             const clamped = Math.min(65535, Math.max(1, val));
+
+            // If connected, close the connection so the user must hit Play again
+            if (SerialDataObject.udpSocket) {
+              StopUDP();
+            }
+
             setPort(clamped);
             SerialDataObject.udpPort = clamped;
           }
